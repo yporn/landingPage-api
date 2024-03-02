@@ -30,17 +30,17 @@ type logger struct {
 	Response   any    `json:"response"`
 }
 
-func InitLogger(c *fiber.Ctx, res any) ILogger {
+func InitLogger(c *fiber.Ctx, res any, code int) ILogger {
 	log := &logger{
 		Time:       time.Now().Local().Format("2006-01-02 15:04:05"),
 		Ip:         c.IP(),
 		Method:     c.Method(),
 		Path:       c.Path(),
-		StatusCode: c.Response().StatusCode(),
+		StatusCode: code,
 	}
 	log.SetQuery(c)
 	log.SetResponse(c)
-	log.SetResponse(c)
+	log.SetResponse(res)
 	return log
 }
 
