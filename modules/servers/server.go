@@ -41,7 +41,7 @@ func (s *server) Start() {
 	middlewares := InitMiddlewares(s)
 	s.app.Use(middlewares.Logger())
 	s.app.Use(middlewares.Cors())
-	
+	s.app.Static("/assets", "./assets")
 	// Modules
 	v1 := s.app.Group("v1")
 	modules := InitModule(v1, s, middlewares)

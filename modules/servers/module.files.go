@@ -32,6 +32,7 @@ func (f *filesModule) Init() {
 	router := f.r.Group("/files")
 	router.Post("/upload", f.mid.JwtAuth(), f.mid.Authorize(2), f.handler.UploadFiles)
 	router.Patch("/delete", f.mid.JwtAuth(), f.mid.Authorize(2), f.handler.DeleteFile)
+
 }
 
 func (f *filesModule) Usecase() filesUsecases.IFilesUsecase { return f.usecase }

@@ -46,7 +46,7 @@ func (u *filesUsecase) uploadToStorageWorker(ctx context.Context, jobs <-chan *f
 		}
 
 		// Upload an object to storage
-		dest := fmt.Sprintf("./assets/images/%s", job.Destination)
+		dest := fmt.Sprintf("assets/images/%s", job.Destination)
 		if err := os.WriteFile(dest, b, 0777); err != nil {
 			if err := os.MkdirAll("./assets/images/"+strings.Replace(job.Destination, job.FileName, "", 1), 0777); err != nil {
 				errs <- fmt.Errorf("mkdir \"./assets/images/%s\" failed: %v", err, job.Destination)
@@ -61,9 +61,9 @@ func (u *filesUsecase) uploadToStorageWorker(ctx context.Context, jobs <-chan *f
 		newFile := &filesPub{
 			file: &files.FileRes{
 				FileName: job.FileName,
-				Url:      fmt.Sprintf("http://%s:%d/%s", u.cfg.App().Host(), u.cfg.App().Port(), job.Destination),
+				Url:      fmt.Sprintf("http://%s:%d/%s", u.cfg.App().Host(), u.cfg.App().Port(), dest),
 			},
-			destination: job.Destination,
+			destination: dest,
 		}
 
 		errs <- nil

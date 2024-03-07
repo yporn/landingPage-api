@@ -1,12 +1,15 @@
-FROM golang:1.20-buster AS build
+FROM golang:1.17-alpine AS builder
 
 WORKDIR /app
 
-COPY . ./
+COPY go.mod go.sum ./
+
 RUN go mod download
 
-RUN CGO_ENABLED=0 go build -o /bin/app
+COPY . .
 
-EXPOSE 3000
+RUN go build -o main .
 
-ENTRYPOINT [ "/bin/app", "/bin/.env.prod" ]
+EXPOSE 8000
+
+CMD ["./main"]

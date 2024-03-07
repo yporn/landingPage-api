@@ -57,6 +57,7 @@ func (m *moduleFactory) MonitorModule() {
 	handler := monitorHandlers.MonitorHandler(m.s.cfg)
 
 	m.r.Get("/", handler.HealthCheck)
+	
 }
 
 func (m *moduleFactory) UserModule() {
