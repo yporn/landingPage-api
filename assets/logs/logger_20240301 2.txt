@@ -1,0 +1,10 @@
+{"time":"2024-03-01 10:21:27","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/v1/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:22:00","ip":"127.0.0.1","method":"POST","status_code":200,"path":"//users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:22:31","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:23:50","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:26:51","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:27:45","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/v1/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:29:48","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/v1/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:33:24","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/v1/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:33:34","ip":"127.0.0.1","method":"POST","status_code":200,"path":"/v1/users/signup","query":null,"body":null,"response":{}}
+{"time":"2024-03-01 10:34:37","ip":"127.0.0.1","method":"POST","status_code":400,"path":"/v1/users/signup","query":null,"body":null,"response":{"trace_id":"users-001","message":"username has been used"}}
