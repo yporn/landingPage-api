@@ -221,6 +221,8 @@ CREATE TABLE "interests" (
   "interest_rate" VARCHAR,
   "note" VARCHAR,
   "display" display NOT NULL,
+  "filename" VARCHAR,
+  "url" VARCHAR,
   "created_at"  TIMESTAMP NOT NULL DEFAULT now(),
   "updated_at"  TIMESTAMP NOT NULL DEFAULT now()
 );
@@ -238,6 +240,7 @@ CREATE TABLE "careers" (
   "id" SERIAL PRIMARY KEY,
   "position" VARCHAR,
   "amount" VARCHAR,
+  "location" VARCHAR,
   "description" TEXT,
   "qualification" TEXT,
   "start_date" DATE,
