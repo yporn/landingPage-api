@@ -127,8 +127,6 @@ func (b *updateJobBuilder) updateQuery() {
 	b.query += strings.Join(setStatements, ", ")
 }
 
-
-
 func (b *updateJobBuilder) closeQuery() {
 	b.values = append(b.values, b.req.Id)
 	b.lastStackIndex = len(b.values)

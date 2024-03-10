@@ -35,7 +35,7 @@ DROP TABLE IF EXISTS "brands" CASCADE;
 DROP TABLE IF EXISTS "data_settings" CASCADE;
 DROP TABLE IF EXISTS "projects" CASCADE;
 DROP TABLE IF EXISTS "project_images" CASCADE;
-DROP TABLE IF EXISTS "projects_house_type_items" CASCADE;
+DROP TABLE IF EXISTS "project_house_type_items" CASCADE;
 DROP TABLE IF EXISTS "project_desc_area_items" CASCADE;
 DROP TABLE IF EXISTS "project_comfortable_items" CASCADE;
 DROP TABLE IF EXISTS "house_models" CASCADE;

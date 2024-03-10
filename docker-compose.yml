@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "4444:5432"
+      - "5435:4444"
     restart: unless-stopped
 
   pgadmin:
@@ -31,7 +31,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_HOST=postgres
+      - DB_HOST=localhost
       - DB_PORT=4444
       - DB_USER=admin
       - DB_PASSWORD=password

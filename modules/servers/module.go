@@ -2,9 +2,15 @@ package servers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	activitiesRepositories "github.com/yporn/sirarom-backend/modules/activities/ActivitiesRepositories"
+	"github.com/yporn/sirarom-backend/modules/activities/activitiesHandlers"
+	"github.com/yporn/sirarom-backend/modules/activities/activitiesUsecases"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoHandlers"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoRepositories"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoUsecases"
+	"github.com/yporn/sirarom-backend/modules/banners/bannersHandlers"
+	"github.com/yporn/sirarom-backend/modules/banners/bannersRepositories"
+	"github.com/yporn/sirarom-backend/modules/banners/bannersUsecases"
 	"github.com/yporn/sirarom-backend/modules/general/generalHandlers"
 	"github.com/yporn/sirarom-backend/modules/general/generalRepositories"
 	"github.com/yporn/sirarom-backend/modules/general/generalUsecases"
@@ -31,6 +37,8 @@ type IModuleFactory interface {
 	FilesModule() IFilesModule
 	GeneralModule()
 	InterestModule()
+	BannerModule()
+	ActivityModule()
 }
 
 type moduleFactory struct {
@@ -122,4 +130,32 @@ func (m *moduleFactory) InterestModule() {
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddInterest)
 	// router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateJob)
 	// router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteJob)
+}
+
+func (m *moduleFactory) BannerModule() {
+	repository := bannersRepositories.BannersRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := bannersUsecases.BannersUsecase(repository)
+	handler := bannersHandlers.BannersHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/banners")
+
+	router.Get("/:banner_id", m.mid.JwtAuth(), handler.FindOneBanner)
+	router.Get("/", m.mid.JwtAuth(), handler.FindBanner)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddBanner)
+	router.Patch("/update/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateBanner)
+	router.Delete("/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteBanner)
+}
+
+func (m *moduleFactory) ActivityModule() {
+	repository := activitiesRepositories.ActivitiesRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := activitiesUsecases.ActivitiesUsecase(repository)
+	handler := activitiesHandlers.ActivitiesHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/activities")
+
+	router.Get("/:activity_id", m.mid.JwtAuth(), handler.FindOneActivity)
+	router.Get("/", m.mid.JwtAuth(), handler.FindActivity)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddActivity)
+	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
+	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteActivity)
 }

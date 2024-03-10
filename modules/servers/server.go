@@ -53,6 +53,8 @@ func (s *server) Start() {
 	modules.FilesModule().Init()
 	modules.GeneralModule()
 	modules.InterestModule()
+	modules.BannerModule()
+	modules.ActivityModule()
 	
 	s.app.Use(middlewares.RouterCheck())
 	//Graceful Shutdown

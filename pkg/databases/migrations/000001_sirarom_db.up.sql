@@ -290,7 +290,7 @@ CREATE TABLE "promotion_house_models" (
 
 CREATE TABLE "activities" (
   "id" SERIAL PRIMARY KEY,
-  "index" VARCHAR,
+  "index" INTEGER,
   "heading" VARCHAR,
   "description" TEXT,
   "start_date" DATE,
@@ -310,41 +310,41 @@ CREATE TABLE "activities_images" (
   "updated_at"  TIMESTAMP NOT NULL DEFAULT now()
 );
 
-ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
+ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "oauth" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "oauth" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "banner_images" ADD FOREIGN KEY ("banner_id") REFERENCES "banners" ("id");
+ALTER TABLE "banner_images" ADD FOREIGN KEY ("banner_id") REFERENCES "banners" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "project_images" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
+ALTER TABLE "project_images" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "project_house_type_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
+ALTER TABLE "project_house_type_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "project_desc_area_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
+ALTER TABLE "project_desc_area_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "project_comfortable_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
+ALTER TABLE "project_comfortable_items" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "house_models" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id");
+ALTER TABLE "house_models" ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "house_model_images" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id");
+ALTER TABLE "house_model_images" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "house_model_type_items" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id");
+ALTER TABLE "house_model_type_items" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "house_model_plans" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id");
+ALTER TABLE "house_model_plans" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "house_model_plans_items" ADD FOREIGN KEY ("house_model_plan_id") REFERENCES "house_model_plans" ("id");
+ALTER TABLE "house_model_plans_items" ADD FOREIGN KEY ("house_model_plan_id") REFERENCES "house_model_plans" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "interest_images" ADD FOREIGN KEY ("interest_id") REFERENCES "interests" ("id");
+ALTER TABLE "interest_images" ADD FOREIGN KEY ("interest_id") REFERENCES "interests" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "promotion_images" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id");
+ALTER TABLE "promotion_images" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "promotion_free_items" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id");
+ALTER TABLE "promotion_free_items" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "promotion_house_models" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id");
+ALTER TABLE "promotion_house_models" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "promotion_house_models" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id");
+ALTER TABLE "promotion_house_models" ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "activities_images" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id");
+ALTER TABLE "activities_images" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id") ON DELETE CASCADE;
 
 
 CREATE TRIGGER set_updated_at_timestamp_users_table BEFORE UPDATE ON "users" FOR EACH ROW EXECUTE PROCEDURE set_updated_at_column();

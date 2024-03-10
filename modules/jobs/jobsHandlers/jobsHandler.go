@@ -74,7 +74,7 @@ func (h *jobsHandler) FindJob(c *fiber.Ctx) error {
 	}
 
 	if req.Limit < 5 {
-		req.Limit = 5
+		req.Limit = 10000000
 	}
 
 	if req.OrderBy == "" {
