@@ -1,44 +1,52 @@
 version: '3.8'
 
 services:
-  postgres:
+  db:
     image: postgres:latest
-    container_name: postgres
     environment:
       POSTGRES_DB: sirarom_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./database:/var/lib/postgresql/data
     ports:
-      - "5435:4444"
-    restart: unless-stopped
+      - "5435:5432"
+    restart: always
+    networks:
+      - sirarom_net
 
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD: password
     ports:
       - "5050:80"
     depends_on:
-      - postgres
-    restart: unless-stopped
+      - db
+    restart: always
+    networks:
+      - sirarom_net
 
-  myapp:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile 
     ports:
-      - "8000:8000"
-    environment:
-      - DB_HOST=localhost
-      - DB_PORT=4444
-      - DB_USER=admin
-      - DB_PASSWORD=password
-      - DB_NAME=sirarom_db
+      - "8500:8500"
+    # environment:
+    #   - DB_HOST=localhost
+    #   - DB_PORT=5432
+    #   - DB_USER=admin
+    #   - DB_PASSWORD=password
+    #   - DB_NAME=sirarom_db
     depends_on:
-      - postgres
-    restart: unless-stopped
+      - db
+    restart: always
+    networks:
+      - sirarom_net
 
-volumes:
-  postgres_data:
+networks:
+  sirarom_net:
+    driver: bridge
