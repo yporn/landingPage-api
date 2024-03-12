@@ -144,6 +144,15 @@ CREATE TABLE "interests" (
   "updated_at" timestamp
 );
 
+CREATE TABLE "interest_images" (
+  "id" varchar PRIMARY KEY,
+  "filename" varchar,
+  "url" varchar,
+  "interest_id" varchar,
+  "created_at" timestamp,
+  "updated_at" timestamp
+);
+
 CREATE TABLE "careers" (
   "id" varchar PRIMARY KEY,
   "position" varchar,

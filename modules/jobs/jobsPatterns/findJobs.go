@@ -52,15 +52,7 @@ func (b *findJobBuilder) openJsonQuery() {
 func (b *findJobBuilder) initQuery() {
 	b.query += `
 		SELECT 
-			"id",
-			"position",
-			"amount",
-			"location",
-			"start_date",
-			"end_date",
-			"display",
-			"created_at",
-			"updated_at"
+			*
 		FROM "careers"
 		WHERE 1=1
 	`
