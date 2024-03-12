@@ -30,6 +30,7 @@ vendor/
 vendor
 /Godeps/
 /assets
+/database/*
 
 # Customs
 *.env*

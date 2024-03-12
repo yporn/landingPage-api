@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: Dockerfile 
     ports:
-      - "8500:8500"
+      - "8500:3000"
     # environment:
     #   - DB_HOST=localhost
     #   - DB_PORT=5432
