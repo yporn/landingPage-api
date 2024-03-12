@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/yporn/sirarom-backend/modules/activities"
-	"github.com/yporn/sirarom-backend/modules/activities/ActivitiesRepositories"
+	"github.com/yporn/sirarom-backend/modules/activities/activitiesRepositories"
 	"github.com/yporn/sirarom-backend/modules/entities"
 )
 

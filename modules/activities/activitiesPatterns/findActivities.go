@@ -60,6 +60,8 @@ func (b *findActivityBuilder) initQuery() {
 			"a"."description",
 			"a"."start_date",
 			"a"."end_date",
+			"a"."display",
+			"a"."video_link",
 			"a"."created_at",
 			"a"."updated_at",
 			(
@@ -127,10 +129,9 @@ func (b *findActivityBuilder) whereQuery() {
 
 func (b *findActivityBuilder) sort() {
 	orderByMap := map[string]string{
-		"id":    "\"a\".\"id\"",
-		"heading": "\"a\".\"heading\"",
+		"id":         "\"a\".\"id\"",
+		"heading":    "\"a\".\"heading\"",
 		"created_at": "\"a\".\"created_at\"",
-
 	}
 	if orderByMap[b.req.OrderBy] == "" {
 		b.req.OrderBy = orderByMap["created_at"]

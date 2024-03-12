@@ -2,8 +2,9 @@ package servers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	activitiesRepositories "github.com/yporn/sirarom-backend/modules/activities/ActivitiesRepositories"
+
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesHandlers"
+	"github.com/yporn/sirarom-backend/modules/activities/activitiesRepositories"
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesUsecases"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoHandlers"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoRepositories"
@@ -101,8 +102,8 @@ func (m *moduleFactory) JobModule() {
 
 	router := m.r.Group("/jobs")
 
-	router.Get("/:job_id", m.mid.JwtAuth(), handler.FindOneJob)
-	router.Get("/", m.mid.JwtAuth(), handler.FindJob)
+	router.Get("/:job_id", handler.FindOneJob)
+	router.Get("/", handler.FindJob)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddJob)
 	router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateJob)
 	router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteJob)
