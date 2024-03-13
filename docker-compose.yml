@@ -34,7 +34,8 @@ services:
 
   app:
     container_name: app
-    image: pepapichat/sirarom-go-app
+    # image: pepapichat/sirarom-go-app
+    image: sirarom-go-app
     # build:
     #   context: .
     #   dockerfile: Dockerfile 
@@ -47,6 +48,7 @@ services:
     # depends_on:
     #   - db
     restart: always
+    command: "/app/main"
     networks:
       - sirarom_net
 
