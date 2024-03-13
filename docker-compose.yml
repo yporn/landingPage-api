@@ -34,7 +34,7 @@ services:
 
   app:
     container_name: app
-    image: go-app
+    image: pepapichat/sirarom-go-app
     # build:
     #   context: .
     #   dockerfile: Dockerfile 
