@@ -73,7 +73,6 @@ func (f *userReq) Admin() (IInsertUser, error) {
 	return f, nil
 }
 
-
 func (f *userReq) Result() (*users.UserPassport, error) {
 	query := `
 	SELECT

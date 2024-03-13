@@ -22,6 +22,6 @@ func main() {
 	// fmt.Println(cfg.Jwt())
 	db := databases.DbConnect(cfg.Db())
 	defer db.Close()
-	
+
 	servers.NewServer(cfg, db).Start()
 }

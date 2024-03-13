@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: sirarom_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    # volumes:
+    #   - ./database:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    restart: always
+    networks:
+      - sirarom_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      POSTGRES_DB: sirarom_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - sirarom_net
+
+  app:
+    container_name: app
+    image: pepapichat/sirarom-go-app
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile 
+    # env_file:
+    #   - .env
+    volumes:
+      - .env.prod:/app/.env
+    ports:
+      - "8500:3000"
+    # depends_on:
+    #   - db
+    restart: always
+    networks:
+      - sirarom_net
+
+networks:
+  sirarom_net:
+    driver: bridge

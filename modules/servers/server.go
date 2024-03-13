@@ -41,12 +41,20 @@ func (s *server) Start() {
 	middlewares := InitMiddlewares(s)
 	s.app.Use(middlewares.Logger())
 	s.app.Use(middlewares.Cors())
+	s.app.Static("/assets", "./assets")
 	// Modules
 	v1 := s.app.Group("v1")
 	modules := InitModule(v1, s, middlewares)
 
 	modules.MonitorModule()
 	modules.UserModule()
+	modules.AppinfoModule()
+	modules.JobModule()
+	modules.FilesModule().Init()
+	modules.GeneralModule()
+	modules.InterestModule()
+	modules.BannerModule()
+	modules.ActivityModule()
 
 	s.app.Use(middlewares.RouterCheck())
 	//Graceful Shutdown
