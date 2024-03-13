@@ -39,3 +39,5 @@ vendor
 *.pem
 apikey.txt
 *.txt
+main
+/bin
