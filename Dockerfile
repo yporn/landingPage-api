@@ -1,5 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:jammy
-FROM golang:1.21.3-alpine AS builder
+FROM --platform=linux/amd64 golang:1.21.3-alpine AS builder
 
 WORKDIR /app
 
@@ -22,7 +21,7 @@ RUN go build -o main .
 
 # RUN chmod +x entrypoint.sh
 
-FROM alpine:3.16
+FROM --platform=linux/amd64 alpine:3.16
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
