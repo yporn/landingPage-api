@@ -48,7 +48,6 @@ services:
     # depends_on:
     #   - db
     restart: always
-    command: "/app/main"
     networks:
       - sirarom_net
 
