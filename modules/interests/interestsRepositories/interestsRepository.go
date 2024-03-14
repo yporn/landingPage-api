@@ -20,11 +20,10 @@ type IInterestRepository interface {
 }
 
 type interestsRepository struct {
-	db  *sqlx.DB
-	cfg config.IConfig
+	db           *sqlx.DB
+	cfg          config.IConfig
 	filesUsecase filesUsecases.IFilesUsecase
 }
-
 
 func InterestsRepository(db *sqlx.DB, cfg config.IConfig, filesUsecase filesUsecases.IFilesUsecase) IInterestRepository {
 	return &interestsRepository{
@@ -40,8 +39,20 @@ func (r *interestsRepository) FindOneInterest(interestId string) (*interests.Int
 		to_jsonb("t")
 	FROM (
 		SELECT
-			*
-		FROM "interests"
+			"bi".*,
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("it")), '[]'::json)
+				FROM (
+					SELECT
+						"i"."id",
+						"i"."filename",
+						"i"."url"
+					FROM "interest_images" "i"
+					WHERE "i"."interest_id" = "bi"."id"
+				) AS "it"
+			) AS "images"
+		FROM "interests" "bi"
 		WHERE "id" = $1
 		LIMIT 1
 	) AS "t";`
@@ -59,17 +70,17 @@ func (r *interestsRepository) FindOneInterest(interestId string) (*interests.Int
 }
 
 func (r *interestsRepository) InsertInterest(req *interests.Interest) (*interests.Interest, error) {
-  
-    builder := interestsPatterns.InsertInterestBuilder(r.db, req)
-    interestId, err := interestsPatterns.InsertInterestEngineer(builder).InsertInterest()
-    if err != nil {
-        return nil, err 
-    }
-    
-    interest, err := r.FindOneInterest(interestId)
-    if err != nil {
-        return nil, err
-    }
-    
-    return interest, nil
+
+	builder := interestsPatterns.InsertInterestBuilder(r.db, req)
+	interestId, err := interestsPatterns.InsertInterestEngineer(builder).InsertInterest()
+	if err != nil {
+		return nil, err
+	}
+
+	interest, err := r.FindOneInterest(interestId)
+	if err != nil {
+		return nil, err
+	}
+
+	return interest, nil
 }

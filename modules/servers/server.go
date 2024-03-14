@@ -55,7 +55,8 @@ func (s *server) Start() {
 	modules.InterestModule()
 	modules.BannerModule()
 	modules.ActivityModule()
-
+	modules.ProjectModule()
+	
 	s.app.Use(middlewares.RouterCheck())
 	//Graceful Shutdown
 	c := make(chan os.Signal, 1)

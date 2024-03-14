@@ -10,13 +10,12 @@ import (
 	"github.com/yporn/sirarom-backend/modules/interests"
 )
 
-
 type IInsertInterestBuidler interface {
 	initTransaction() error
 	insertInterest() error
 	commit() error
 	getInterestId() string
-	// insertAttachment() error
+	insertAttachment() error
 }
 
 type insertInterestBuilder struct {
@@ -54,11 +53,9 @@ func (b *insertInterestBuilder) insertInterest() error {
 		"bank_name",
 		"interest_rate",
 		"note",
-		"display",
-		"filename",
-		"url"
+		"display"
 	)
-	VALUES ($1, $2, $3, $4, $5, $6)
+	VALUES ($1, $2, $3, $4)
 		RETURNING "id";`
 
 	if err := b.tx.QueryRowxContext(
@@ -68,8 +65,8 @@ func (b *insertInterestBuilder) insertInterest() error {
 		b.req.InterestRate,
 		b.req.Note,
 		b.req.Display,	
-		b.req.FileName,
-		b.req.Url,	
+		// b.req.FileName,
+		// b.req.Url,	
 	).Scan(&b.req.Id); err != nil {
 		b.tx.Rollback()
 		return fmt.Errorf("insert interest failed: %v", err)
@@ -77,47 +74,47 @@ func (b *insertInterestBuilder) insertInterest() error {
 	return nil
 }
 
-// func (b *insertInterestBuilder) insertAttachment() error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-// 	defer cancel()
+func (b *insertInterestBuilder) insertAttachment() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
 
-// 	query := `
-// 	INSERT INTO "interest_images" (
-// 		"filename",
-// 		"url",
-// 		"interest_id"
-// 	)
-// 	VALUES`
+	query := `
+	INSERT INTO "interest_images" (
+		"filename",
+		"url",
+		"interest_id"
+	)
+	VALUES`
 
-// 	valueStack := make([]any, 0)
-// 	var index int
-// 	for i := range b.req.Images {
-// 		valueStack = append(valueStack,
-// 			b.req.Images[i].FileName,
-// 			b.req.Images[i].Url,
-// 			b.req.Id,
-// 		)
+	valueStack := make([]any, 0)
+	var index int
+	for i := range b.req.Images {
+		valueStack = append(valueStack,
+			b.req.Images[i].FileName,
+			b.req.Images[i].Url,
+			b.req.Id,
+		)
 
-// 		if i != len(b.req.Images)-1 {
-// 			query += fmt.Sprintf(`
-// 			($%d, $%d, $%d),`, index+1, index+2, index+3)
-// 		} else {
-// 			query += fmt.Sprintf(`
-// 			($%d, $%d, $%d);`, index+1, index+2, index+3)
-// 		}
-// 		index += 3
-// 	}
+		if i != len(b.req.Images)-1 {
+			query += fmt.Sprintf(`
+			($%d, $%d, $%d),`, index+1, index+2, index+3)
+		} else {
+			query += fmt.Sprintf(`
+			($%d, $%d, $%d);`, index+1, index+2, index+3)
+		}
+		index += 3
+	}
 
-// 	if _, err := b.tx.ExecContext(
-// 		ctx,
-// 		query,
-// 		valueStack...,
-// 	); err != nil {
-// 		b.tx.Rollback()
-// 		return fmt.Errorf("insert images failed: %v", err)
-// 	}
-// 	return nil
-// }
+	if _, err := b.tx.ExecContext(
+		ctx,
+		query,
+		valueStack...,
+	); err != nil {
+		b.tx.Rollback()
+		return fmt.Errorf("insert images failed: %v", err)
+	}
+	return nil
+}
 
 func (b *insertInterestBuilder) commit() error {
 	if err := b.tx.Commit(); err != nil {
@@ -143,9 +140,9 @@ func (en *insertInterestEngineer) InsertInterest() (string, error) {
 		return "", err
 	}
 
-	// if err := en.builder.insertAttachment(); err != nil {
-	// 	return "", err
-	// }
+	if err := en.builder.insertAttachment(); err != nil {
+		return "", err
+	}
 	
 	if err := en.builder.commit(); err != nil {
 		return "", err

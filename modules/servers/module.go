@@ -25,6 +25,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresRepositories"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresUsecases"
 	"github.com/yporn/sirarom-backend/modules/monitor/monitorHandlers"
+	"github.com/yporn/sirarom-backend/modules/projects/projectsHandlers"
+	"github.com/yporn/sirarom-backend/modules/projects/projectsRepositories"
+	"github.com/yporn/sirarom-backend/modules/projects/projectsUsecases"
 	"github.com/yporn/sirarom-backend/modules/users/usersHandlers"
 	"github.com/yporn/sirarom-backend/modules/users/usersRepositories"
 	"github.com/yporn/sirarom-backend/modules/users/usersUsecases"
@@ -40,6 +43,7 @@ type IModuleFactory interface {
 	InterestModule()
 	BannerModule()
 	ActivityModule()
+	ProjectModule()
 }
 
 type moduleFactory struct {
@@ -127,7 +131,7 @@ func (m *moduleFactory) InterestModule() {
 
 	router := m.r.Group("/interests")
 
-	router.Get("/:interest_id", m.mid.ApiKeyAuth(), handler.FindOneInterest)
+	router.Get("/:interest_id", handler.FindOneInterest)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddInterest)
 	// router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateJob)
 	// router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteJob)
@@ -159,4 +163,18 @@ func (m *moduleFactory) ActivityModule() {
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddActivity)
 	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
 	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteActivity)
+}
+
+func (m *moduleFactory) ProjectModule() {
+	repository := projectsRepositories.ProjectsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := projectsUsecases.ProjectsUsecase(repository)
+	handler := projectsHandlers.ProjectsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/projects")
+
+	router.Get("/:project_id", m.mid.JwtAuth(), handler.FindOneProject)
+	router.Get("/", m.mid.JwtAuth(), handler.FindProject)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProject)
+	// router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
+	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
 }

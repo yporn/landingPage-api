@@ -54,16 +54,7 @@ func (b *findActivityBuilder) openJsonQuery() {
 func (b *findActivityBuilder) initQuery() {
 	b.query += `
 		SELECT
-			"a"."id",
-			"a"."index",
-			"a"."heading",
-			"a"."description",
-			"a"."start_date",
-			"a"."end_date",
-			"a"."display",
-			"a"."video_link",
-			"a"."created_at",
-			"a"."updated_at",
+			"a".*,
 			(
 				SELECT
 					COALESCE(array_to_json(array_agg("it")), '[]'::json)
@@ -129,29 +120,27 @@ func (b *findActivityBuilder) whereQuery() {
 
 func (b *findActivityBuilder) sort() {
 	orderByMap := map[string]string{
-		"id":         "\"a\".\"id\"",
-		"heading":    "\"a\".\"heading\"",
-		"created_at": "\"a\".\"created_at\"",
-	}
-	if orderByMap[b.req.OrderBy] == "" {
-		b.req.OrderBy = orderByMap["created_at"]
-	} else {
-		b.req.OrderBy = orderByMap[b.req.OrderBy]
+		"id":         "\"id\"",
+		"position":   "\"position\"",
+		"location":   "\"location\"",
+		"created_at": "\"created_at\"",
 	}
 
-	sortMap := map[string]string{
-		"DESC": "DESC",
-		"ASC":  "ASC",
-	}
-	if sortMap[b.req.Sort] == "" {
-		b.req.Sort = sortMap["ASC"]
+	orderBy := orderByMap[b.req.OrderBy]
+	if orderBy == "" {
+		orderBy = orderByMap["id"]
 	} else {
-		b.req.Sort = sortMap[strings.ToUpper(b.req.Sort)]
+		orderBy = orderByMap[b.req.OrderBy]
 	}
 
-	b.values = append(b.values, b.req.OrderBy)
+	sortOrder := strings.ToUpper(b.req.Sort)
+	if sortOrder == "" {
+		b.req.Sort = "desc"
+	}
+
+	// b.values = append(b.values, b.req.OrderBy)
 	b.query += fmt.Sprintf(`
-		ORDER BY $%d %s`, b.lastStackIndex+1, b.req.Sort)
+		ORDER BY %s %s`, orderBy, b.req.Sort)
 	b.lastStackIndex = len(b.values)
 }
 
