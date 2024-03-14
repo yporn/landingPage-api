@@ -30,6 +30,7 @@ vendor/
 vendor
 /Godeps/
 /assets
+/database/*
 
 # Customs
 *.env*
@@ -38,3 +39,6 @@ vendor
 *.pem
 apikey.txt
 *.txt
+main
+/bin
+!.env.example
