@@ -132,9 +132,11 @@ func (m *moduleFactory) InterestModule() {
 	router := m.r.Group("/interests")
 
 	router.Get("/:interest_id", handler.FindOneInterest)
+	router.Get("/", handler.FindInterest)
+
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddInterest)
-	// router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateJob)
-	// router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteJob)
+	router.Patch("/update/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateInterest)
+	router.Delete("/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteInterest)
 }
 
 func (m *moduleFactory) BannerModule() {
@@ -144,8 +146,8 @@ func (m *moduleFactory) BannerModule() {
 
 	router := m.r.Group("/banners")
 
-	router.Get("/:banner_id", m.mid.JwtAuth(), handler.FindOneBanner)
-	router.Get("/", m.mid.JwtAuth(), handler.FindBanner)
+	router.Get("/:banner_id", handler.FindOneBanner)
+	router.Get("/", handler.FindBanner)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddBanner)
 	router.Patch("/update/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateBanner)
 	router.Delete("/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteBanner)
@@ -158,8 +160,8 @@ func (m *moduleFactory) ActivityModule() {
 
 	router := m.r.Group("/activities")
 
-	router.Get("/:activity_id", m.mid.JwtAuth(), handler.FindOneActivity)
-	router.Get("/", m.mid.JwtAuth(), handler.FindActivity)
+	router.Get("/:activity_id", handler.FindOneActivity)
+	router.Get("/", handler.FindActivity)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddActivity)
 	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
 	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteActivity)
@@ -172,8 +174,8 @@ func (m *moduleFactory) ProjectModule() {
 
 	router := m.r.Group("/projects")
 
-	router.Get("/:project_id", m.mid.JwtAuth(), handler.FindOneProject)
-	router.Get("/", m.mid.JwtAuth(), handler.FindProject)
+	router.Get("/:project_id", handler.FindOneProject)
+	router.Get("/", handler.FindProject)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProject)
 	// router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
 	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)

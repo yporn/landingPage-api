@@ -1,4 +1,4 @@
-package activitiesPatterns
+package interestsPatterns
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/yporn/sirarom-backend/modules/activities"
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
+	"github.com/yporn/sirarom-backend/modules/interests"
 )
 
-type IUpdateActivityBuilder interface {
+type IUpdateInterestBuilder interface {
 	initTransaction() error
 	initQuery()
 	updateQuery()
@@ -20,7 +20,7 @@ type IUpdateActivityBuilder interface {
 	getOldImages() []*entities.Image
 	deleteOldImages() error
 	closeQuery()
-	updateActivity() error
+	updateInterest() error
 	getQueryFields() []string
 	getValues() []any
 	getQuery() string
@@ -29,10 +29,10 @@ type IUpdateActivityBuilder interface {
 	commit() error
 }
 
-type updateActivityBuilder struct {
+type updateInterestBuilder struct {
 	db             *sqlx.DB
 	tx             *sqlx.Tx
-	req            *activities.Activity
+	req            *interests.Interest
 	filesUsecases  filesUsecases.IFilesUsecase
 	query          string
 	queryFields    []string
@@ -40,8 +40,8 @@ type updateActivityBuilder struct {
 	values         []any
 }
 
-func UpdateActivityBuilder(db *sqlx.DB, req *activities.Activity, filesUsecases filesUsecases.IFilesUsecase) IUpdateActivityBuilder {
-	return &updateActivityBuilder{
+func UpdateInterestBuilder(db *sqlx.DB, req *interests.Interest, filesUsecases filesUsecases.IFilesUsecase) IUpdateInterestBuilder {
+	return &updateInterestBuilder{
 		db:            db,
 		req:           req,
 		filesUsecases: filesUsecases,
@@ -50,11 +50,11 @@ func UpdateActivityBuilder(db *sqlx.DB, req *activities.Activity, filesUsecases 
 	}
 }
 
-type updateActivityEngineer struct {
-	builder IUpdateActivityBuilder
+type updateInterestEngineer struct {
+	builder IUpdateInterestBuilder
 }
 
-func (b *updateActivityBuilder) initTransaction() error {
+func (b *updateInterestBuilder) initTransaction() error {
 	tx, err := b.db.BeginTxx(context.Background(), nil)
 	if err != nil {
 		return err
@@ -63,53 +63,32 @@ func (b *updateActivityBuilder) initTransaction() error {
 	return nil
 }
 
-func (b *updateActivityBuilder) initQuery() {
+func (b *updateInterestBuilder) initQuery() {
 	b.query += `
-	UPDATE "activities" SET`
+	UPDATE "interests" SET`
 }
 
-func (b *updateActivityBuilder) updateQuery() {
+func (b *updateInterestBuilder) updateQuery() {
 	setStatements := []string{}
-	if b.req.Index != 0 {
-		b.values = append(b.values, b.req.Index)
+	if b.req.BankName != "" {
+		b.values = append(b.values, b.req.BankName)
 		b.lastStackIndex = len(b.values)
 
-		setStatements = append(setStatements, fmt.Sprintf(`"index" = $%d`, b.lastStackIndex))
+		setStatements = append(setStatements, fmt.Sprintf(`"bank_name" = $%d`, b.lastStackIndex))
 	}
 
-	if b.req.Heading != "" {
-		b.values = append(b.values, b.req.Heading)
+	if b.req.InterestRate != "" {
+		b.values = append(b.values, b.req.InterestRate)
 		b.lastStackIndex = len(b.values)
 
-		setStatements = append(setStatements, fmt.Sprintf(`"heading" = $%d`, b.lastStackIndex))
+		setStatements = append(setStatements, fmt.Sprintf(`"interest_rate" = $%d`, b.lastStackIndex))
 	}
 
-	if b.req.Description != "" {
-		b.values = append(b.values, b.req.Description)
+	if b.req.Note != "" {
+		b.values = append(b.values, b.req.Note)
 		b.lastStackIndex = len(b.values)
 
-		setStatements = append(setStatements, fmt.Sprintf(`"description" = $%d`, b.lastStackIndex))
-	}
-
-	if b.req.StartDate != "" {
-		b.values = append(b.values, b.req.StartDate)
-		b.lastStackIndex = len(b.values)
-
-		setStatements = append(setStatements, fmt.Sprintf(`"start_date" = $%d`, b.lastStackIndex))
-	}
-
-	if b.req.EndDate != "" {
-		b.values = append(b.values, b.req.EndDate)
-		b.lastStackIndex = len(b.values)
-
-		setStatements = append(setStatements, fmt.Sprintf(`"end_date" = $%d`, b.lastStackIndex))
-	}
-
-	if b.req.VideoLink != "" {
-		b.values = append(b.values, b.req.VideoLink)
-		b.lastStackIndex = len(b.values)
-
-		setStatements = append(setStatements, fmt.Sprintf(`"video_link" = $%d`, b.lastStackIndex))
+		setStatements = append(setStatements, fmt.Sprintf(`"note" = $%d`, b.lastStackIndex))
 	}
 
 	if b.req.Display != "" {
@@ -122,12 +101,12 @@ func (b *updateActivityBuilder) updateQuery() {
 	b.query += strings.Join(setStatements, ", ")
 }
 
-func (b *updateActivityBuilder) insertImages() error {
+func (b *updateInterestBuilder) insertImages() error {
 	query := `
-	INSERT INTO "activities_images" (
+	INSERT INTO "interest_images" (
 		"filename",
 		"url",
-		"activity_id"
+		"interest_id"
 	)
 	VALUES`
 
@@ -161,14 +140,14 @@ func (b *updateActivityBuilder) insertImages() error {
 	return nil
 }
 
-func (b *updateActivityBuilder) getOldImages() []*entities.Image {
+func (b *updateInterestBuilder) getOldImages() []*entities.Image {
 	query := `
 	SELECT
 		"id",
 		"filename",
 		"url"
-	FROM "activities_images"
-	WHERE "activity_id" = $1;`
+	FROM "interest_images"
+	WHERE "interest_id" = $1;`
 
 	images := make([]*entities.Image, 0)
 	if err := b.db.Select(
@@ -181,17 +160,17 @@ func (b *updateActivityBuilder) getOldImages() []*entities.Image {
 	return images
 }
 
-func (b *updateActivityBuilder) deleteOldImages() error {
+func (b *updateInterestBuilder) deleteOldImages() error {
 	query := `
-	DELETE FROM "activities_images"
-	WHERE "activity_id" = $1;`
+	DELETE FROM "interest_images"
+	WHERE "interest_id" = $1;`
 
 	images := b.getOldImages()
 	if len(images) > 0 {
 		deleteFileReq := make([]*files.DeleteFileReq, 0)
 		for _, img := range images {
 			deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-				Destination: fmt.Sprintf("images/activity/%s", img.FileName),
+				Destination: fmt.Sprintf("images/interests/%s", img.FileName),
 			})
 		}
 		b.filesUsecases.DeleteFileOnStorage(deleteFileReq)
@@ -208,7 +187,7 @@ func (b *updateActivityBuilder) deleteOldImages() error {
 	return nil
 }
 
-func (b *updateActivityBuilder) closeQuery() {
+func (b *updateInterestBuilder) closeQuery() {
 	b.values = append(b.values, b.req.Id)
 	b.lastStackIndex = len(b.values)
 
@@ -216,31 +195,31 @@ func (b *updateActivityBuilder) closeQuery() {
 	WHERE "id" = $%d`, b.lastStackIndex)
 }
 
-func (b *updateActivityBuilder) updateActivity() error {
+func (b *updateInterestBuilder) updateInterest() error {
 	if _, err := b.tx.ExecContext(context.Background(), b.query, b.values...); err != nil {
 		b.tx.Rollback()
-		return fmt.Errorf("update activity failed: %v", err)
+		return fmt.Errorf("update interest failed: %v", err)
 	}
 	return nil
 }
 
-func (b *updateActivityBuilder) getQueryFields() []string { return b.queryFields }
-func (b *updateActivityBuilder) getValues() []any         { return b.values }
-func (b *updateActivityBuilder) getQuery() string         { return b.query }
-func (b *updateActivityBuilder) setQuery(query string)    { b.query = query }
-func (b *updateActivityBuilder) getImagesLen() int        { return len(b.req.Images) }
-func (b *updateActivityBuilder) commit() error {
+func (b *updateInterestBuilder) getQueryFields() []string { return b.queryFields }
+func (b *updateInterestBuilder) getValues() []any         { return b.values }
+func (b *updateInterestBuilder) getQuery() string         { return b.query }
+func (b *updateInterestBuilder) setQuery(query string)    { b.query = query }
+func (b *updateInterestBuilder) getImagesLen() int        { return len(b.req.Images) }
+func (b *updateInterestBuilder) commit() error {
 	if err := b.tx.Commit(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateActivityEngineer(b IUpdateActivityBuilder) *updateActivityEngineer {
-	return &updateActivityEngineer{builder: b}
+func UpdateInterestEngineer(b IUpdateInterestBuilder) *updateInterestEngineer {
+	return &updateInterestEngineer{builder: b}
 }
 
-func (en *updateActivityEngineer) sumQueryFields() {
+func (en *updateInterestEngineer) sumQueryFields() {
 	en.builder.updateQuery()
 
 	fields := en.builder.getQueryFields()
@@ -255,7 +234,7 @@ func (en *updateActivityEngineer) sumQueryFields() {
 	}
 }
 
-func (en *updateActivityEngineer) UpdateActivity() error {
+func (en *updateInterestEngineer) UpdateInterest() error {
 	en.builder.initTransaction()
 
 	en.builder.initQuery()
@@ -264,8 +243,8 @@ func (en *updateActivityEngineer) UpdateActivity() error {
 
 	fmt.Println(en.builder.getQuery())
 
-	// Update
-	if err := en.builder.updateActivity(); err != nil {
+	
+	if err := en.builder.updateInterest(); err != nil {
 		return err
 	}
 

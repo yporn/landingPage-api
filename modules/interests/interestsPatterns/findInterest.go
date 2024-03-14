@@ -1,4 +1,4 @@
-package activitiesPatterns
+package interestsPatterns
 
 import (
 	"context"
@@ -10,12 +10,11 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-
-	"github.com/yporn/sirarom-backend/modules/activities"
+	"github.com/yporn/sirarom-backend/modules/interests"
 	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
-type IFindActivityBuilder interface {
+type IFindInterestBuilder interface {
 	openJsonQuery()
 	initQuery()
 	countQuery()
@@ -24,37 +23,37 @@ type IFindActivityBuilder interface {
 	paginate()
 	closeJsonQuery()
 	resetQuery()
-	Result() []*activities.Activity
+	Result() []*interests.Interest
 	Count() int
 	PrintQuery()
 }
 
-type findActivityBuilder struct {
+type findInterestBuilder struct {
 	db             *sqlx.DB
-	req            *activities.ActivityFilter
+	req            *interests.InterestFilter
 	query          string
 	lastStackIndex int
 	values         []any
 }
 
-func FindActivityBuilder(db *sqlx.DB, req *activities.ActivityFilter) IFindActivityBuilder {
-	return &findActivityBuilder{
+func FindInterestBuilder(db *sqlx.DB, req *interests.InterestFilter) IFindInterestBuilder {
+	return &findInterestBuilder{
 		db:  db,
 		req: req,
 	}
 }
 
-func (b *findActivityBuilder) openJsonQuery() {
+func (b *findInterestBuilder) openJsonQuery() {
 	b.query += `
 	SELECT
 		array_to_json(array_agg("t"))
 	FROM (`
 }
 
-func (b *findActivityBuilder) initQuery() {
+func (b *findInterestBuilder) initQuery() {
 	b.query += `
 		SELECT
-			"a".*,
+			"bi".*,
 			(
 				SELECT
 					COALESCE(array_to_json(array_agg("it")), '[]'::json)
@@ -63,23 +62,23 @@ func (b *findActivityBuilder) initQuery() {
 						"i"."id",
 						"i"."filename",
 						"i"."url"
-					FROM "activities_images" "i"
-					WHERE "i"."activity_id" = "a"."id"
+					FROM "interest_images" "i"
+					WHERE "i"."interest_id" = "bi"."id"
 				) AS "it"
 			) AS "images"
-		FROM "activities" "a"
+		FROM "interests" "bi"
 		WHERE 1 = 1`
 }
 
-func (b *findActivityBuilder) countQuery() {
+func (b *findInterestBuilder) countQuery() {
 	b.query += `
 		SELECT
 			COUNT(*) AS "count"
-		FROM "activities" "a"
+		FROM "interests" "bi"
 		WHERE 1 = 1`
 }
 
-func (b *findActivityBuilder) whereQuery() {
+func (b *findInterestBuilder) whereQuery() {
 	var queryWhere string
 	queryWhereStack := make([]string, 0)
 
@@ -88,7 +87,7 @@ func (b *findActivityBuilder) whereQuery() {
 		b.values = append(b.values, b.req.Id)
 
 		queryWhereStack = append(queryWhereStack, `
-		AND "a"."id" = ?`)
+		AND "bi"."id" = ?`)
 	}
 
 	// Search check
@@ -100,7 +99,7 @@ func (b *findActivityBuilder) whereQuery() {
 		)
 
 		queryWhereStack = append(queryWhereStack, `
-		AND (LOWER("a"."heading") LIKE ?)`)
+		AND (LOWER("bi"."bank_name") LIKE ?)`)
 	}
 
 	for i := range queryWhereStack {
@@ -118,11 +117,9 @@ func (b *findActivityBuilder) whereQuery() {
 	b.query += queryWhere
 }
 
-func (b *findActivityBuilder) sort() {
+func (b *findInterestBuilder) sort() {
 	orderByMap := map[string]string{
 		"id":         "\"id\"",
-		"position":   "\"position\"",
-		"location":   "\"location\"",
 		"created_at": "\"created_at\"",
 	}
 
@@ -144,7 +141,7 @@ func (b *findActivityBuilder) sort() {
 	b.lastStackIndex = len(b.values)
 }
 
-func (b *findActivityBuilder) paginate() {
+func (b *findInterestBuilder) paginate() {
 	// offset (page - 1)*limit
 	b.values = append(b.values, (b.req.Page-1)*b.req.Limit, b.req.Limit)
 
@@ -152,64 +149,64 @@ func (b *findActivityBuilder) paginate() {
 	b.lastStackIndex = len(b.values)
 }
 
-func (b *findActivityBuilder) closeJsonQuery() {
+func (b *findInterestBuilder) closeJsonQuery() {
 	b.query += `
 	) AS "t";`
 }
 
-func (b *findActivityBuilder) resetQuery() {
+func (b *findInterestBuilder) resetQuery() {
 	b.query = ""
 	b.values = make([]any, 0)
 	b.lastStackIndex = 0
 }
 
-func (b *findActivityBuilder) Result() []*activities.Activity {
+func (b *findInterestBuilder) Result() []*interests.Interest {
 	_, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	bytes := make([]byte, 0)
-	activitiesData := make([]*activities.Activity, 0)
+	interestsData := make([]*interests.Interest, 0)
 
 	if err := b.db.Get(&bytes, b.query, b.values...); err != nil {
-		log.Printf("find activities failed: %v\n", err)
-		return make([]*activities.Activity, 0)
+		log.Printf("find interests failed: %v\n", err)
+		return make([]*interests.Interest, 0)
 	}
 
-	if err := json.Unmarshal(bytes, &activitiesData); err != nil {
-		log.Printf("unmarshal activities failed: %v\n", err)
-		return make([]*activities.Activity, 0)
+	if err := json.Unmarshal(bytes, &interestsData); err != nil {
+		log.Printf("unmarshal interests failed: %v\n", err)
+		return make([]*interests.Interest, 0)
 	}
 	b.resetQuery()
-	return activitiesData
+	return interestsData
 }
 
-func (b *findActivityBuilder) Count() int {
+func (b *findInterestBuilder) Count() int {
 	_, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	var count int
 	if err := b.db.Get(&count, b.query, b.values...); err != nil {
-		log.Printf("count activities failed: %v\n", err)
+		log.Printf("count interests failed: %v\n", err)
 		return 0
 	}
 	b.resetQuery()
 	return count
 }
 
-func (b *findActivityBuilder) PrintQuery() {
+func (b *findInterestBuilder) PrintQuery() {
 	utils.Debug(b.values)
 	fmt.Println(b.query)
 }
 
-type findActivityEngineer struct {
-	builder IFindActivityBuilder
+type findInterestEngineer struct {
+	builder IFindInterestBuilder
 }
 
-func FindActivityEngineer(builder IFindActivityBuilder) *findActivityEngineer {
-	return &findActivityEngineer{builder: builder}
+func FindInterestEngineer(builder IFindInterestBuilder) *findInterestEngineer {
+	return &findInterestEngineer{builder: builder}
 }
 
-func (en *findActivityEngineer) FindActivity() IFindActivityBuilder {
+func (en *findInterestEngineer) FindInterest() IFindInterestBuilder {
 	en.builder.openJsonQuery()
 	en.builder.initQuery()
 	en.builder.whereQuery()
@@ -219,7 +216,8 @@ func (en *findActivityEngineer) FindActivity() IFindActivityBuilder {
 	return en.builder
 }
 
-func (en *findActivityEngineer) CountActivity() IFindActivityBuilder {
+
+func (en *findInterestEngineer) CountInterest() IFindInterestBuilder {
 	en.builder.countQuery()
 	en.builder.whereQuery()
 	return en.builder

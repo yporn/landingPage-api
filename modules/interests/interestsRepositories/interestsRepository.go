@@ -1,8 +1,10 @@
 package interestsRepositories
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/yporn/sirarom-backend/config"
@@ -13,10 +15,10 @@ import (
 
 type IInterestRepository interface {
 	FindOneInterest(interestId string) (*interests.Interest, error)
-	// FindInterest(req *products.ProductFilter) ([]*products.Product, int)
+	FindInterest(req *interests.InterestFilter) ([]*interests.Interest, int)
 	InsertInterest(req *interests.Interest) (*interests.Interest, error)
-	// UpdateInterest(req *interests.Interest) (*interests.Interest, error)
-	// DeleteInterest(interestId string) error
+	UpdateInterest(req *interests.Interest) (*interests.Interest, error)
+	DeleteInterest(interestId string) error
 }
 
 type interestsRepository struct {
@@ -69,6 +71,15 @@ func (r *interestsRepository) FindOneInterest(interestId string) (*interests.Int
 	return interest, nil
 }
 
+func (r *interestsRepository) FindInterest(req *interests.InterestFilter) ([]*interests.Interest, int) {
+	builder := interestsPatterns.FindInterestBuilder(r.db, req)
+	engineer := interestsPatterns.FindInterestEngineer(builder)
+
+	result := engineer.FindInterest().Result()
+	count := engineer.CountInterest().Count()
+	return result, count
+}
+
 func (r *interestsRepository) InsertInterest(req *interests.Interest) (*interests.Interest, error) {
 
 	builder := interestsPatterns.InsertInterestBuilder(r.db, req)
@@ -83,4 +94,28 @@ func (r *interestsRepository) InsertInterest(req *interests.Interest) (*interest
 	}
 
 	return interest, nil
+}
+
+func (r *interestsRepository) UpdateInterest(req *interests.Interest) (*interests.Interest, error) {
+	builder := interestsPatterns.UpdateInterestBuilder(r.db, req, r.filesUsecase)
+	engineer := interestsPatterns.UpdateInterestEngineer(builder)
+
+	if err := engineer.UpdateInterest(); err != nil {
+		return nil, err
+	}
+
+	interest, err := r.FindOneInterest(strconv.Itoa(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	return interest, nil
+}
+
+func (r *interestsRepository) DeleteInterest(interestId string) error {
+	query := `DELETE FROM "interests" WHERE "id" = $1;`
+
+	if _, err := r.db.ExecContext(context.Background(), query, interestId); err != nil {
+		return fmt.Errorf("delete interest failed: %v", err)
+	}
+	return nil
 }
