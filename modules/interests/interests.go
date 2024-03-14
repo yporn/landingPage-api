@@ -1,7 +1,6 @@
 package interests
 
-//
-// import "github.com/yporn/sirarom-backend/modules/entities"
+import "github.com/yporn/sirarom-backend/modules/entities"
 
 type Interest struct {
 	Id           int    `db:"id" json:"id"`
@@ -11,7 +10,14 @@ type Interest struct {
 	Display      string `db:"display" json:"display"`
 	CreatedAt    string `db:"created_at" json:"created_at"`
 	UpdatedAt    string `db:"updated_at" json:"updated_at"`
-	FileName     string `db:"filename" json:"filename"`
-	Url          string `db:"url" json:"url"`
-	// Images      []*entities.Image `json:"images"`
+	// FileName     string `db:"filename" json:"filename"`
+	// Url          string `db:"url" json:"url"`
+	Images      []*entities.Image `json:"images"`
+}
+
+type InterestFilter struct {
+	Id     string `query:"id"`
+	Search string `query:"search"` // title & description
+	*entities.PaginationReq
+	*entities.SortReq
 }

@@ -111,7 +111,7 @@ CREATE TABLE "data_settings" (
 CREATE TABLE "projects" (
   "id" SERIAL PRIMARY KEY,
   "name" VARCHAR,
-  "index" VARCHAR,
+  "index" INTEGER,
   "heading" VARCHAR,
   "text" VARCHAR,
   "location" TEXT,
@@ -221,8 +221,8 @@ CREATE TABLE "interests" (
   "interest_rate" VARCHAR,
   "note" VARCHAR,
   "display" display NOT NULL,
-  "filename" VARCHAR,
-  "url" VARCHAR,
+  -- "filename" VARCHAR,
+  -- "url" VARCHAR,
   "created_at"  TIMESTAMP NOT NULL DEFAULT now(),
   "updated_at"  TIMESTAMP NOT NULL DEFAULT now()
 );

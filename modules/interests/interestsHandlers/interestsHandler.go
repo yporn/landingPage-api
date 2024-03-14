@@ -58,9 +58,10 @@ func (h *interestsHandler) FindOneInterest(c *fiber.Ctx) error {
 }
 
 func (h *interestsHandler) AddInterest(c *fiber.Ctx) error {
-	req := &interests.Interest{}
-		// Images: make([]*entities.Image, 0),
-	
+	req := &interests.Interest{
+		Images: make([]*entities.Image, 0),
+	}
+
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,

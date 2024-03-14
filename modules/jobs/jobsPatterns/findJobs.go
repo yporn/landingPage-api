@@ -111,14 +111,14 @@ func (b *findJobBuilder) sort() {
 
 	orderBy := orderByMap[b.req.OrderBy]
 	if orderBy == "" {
-		orderBy = orderByMap["created_at"]
+		orderBy = orderByMap["id"]
 	} else {
 		orderBy = orderByMap[b.req.OrderBy]
 	}
 
 	sortOrder := strings.ToUpper(b.req.Sort)
 	if sortOrder == "" {
-		b.req.Sort = "ASC"
+		b.req.Sort = "desc"
 	}
 
 	// b.values = append(b.values, b.req.OrderBy)

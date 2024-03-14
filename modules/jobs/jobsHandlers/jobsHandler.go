@@ -146,7 +146,6 @@ func (h *jobsHandler) UpdateJob(c *fiber.Ctx) error {
 
 func (h *jobsHandler) DeleteJob(c *fiber.Ctx) error {
 	jobId := strings.Trim(c.Params("job_id"), " ")
-
 	_, err := h.jobsUsecase.FindOneJob(jobId)
 	if err != nil {
 		return entities.NewResponse(c).Error(
