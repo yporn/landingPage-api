@@ -122,6 +122,8 @@ type IAppConfig interface {
 	BodyLimit() int
 	FileLimit() int
 	GCPBucket() string
+	Host() string
+	Port() int
 }
 
 type app struct {

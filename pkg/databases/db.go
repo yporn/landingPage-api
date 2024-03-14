@@ -2,9 +2,10 @@ package databases
 
 import (
 	"log"
-	"github.com/yporn/sirarom-backend/config"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/yporn/sirarom-backend/config"
 )
 
 func DbConnect(cfg config.IDbConfig) *sqlx.DB {
