@@ -2,6 +2,7 @@ package projectsHandlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,6 +28,7 @@ type IProjectsHandler interface {
 	FindOneProject(c *fiber.Ctx) error
 	FindProject(c *fiber.Ctx) error
 	AddProject(c *fiber.Ctx) error
+	UpdateProject(c *fiber.Ctx) error
 	DeleteProject(c *fiber.Ctx) error
 }
 
@@ -152,6 +154,44 @@ func (h *projectsHandler) AddProject(c *fiber.Ctx) error {
 		).Res()
 	}
 	return entities.NewResponse(c).Success(fiber.StatusCreated, project).Res()
+}
+
+func (h *projectsHandler) UpdateProject(c *fiber.Ctx) error {
+	projectIdStr := strings.Trim(c.Params("project_id"), " ")
+	projectId, err := strconv.Atoi(projectIdStr)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updateProjectErr),
+			err.Error(),
+		).Res()
+	}
+
+	req := &projects.Project{
+		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
+		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
+		Images:          make([]*entities.Image, 0),
+	}
+
+	if err := c.BodyParser(req); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updateProjectErr),
+			err.Error(),
+		).Res()
+	}
+	req.Id = projectId
+
+	project, err := h.projectsUsecases.UpdateProject(req)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(updateProjectErr),
+			err.Error(),
+		).Res()
+	}
+	return entities.NewResponse(c).Success(fiber.StatusOK, project).Res()
 }
 
 func (h *projectsHandler) DeleteProject(c *fiber.Ctx) error {

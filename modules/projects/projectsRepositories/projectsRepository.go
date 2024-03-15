@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/yporn/sirarom-backend/config"
@@ -17,6 +18,7 @@ type IProjectRepository interface {
 	FindOneProject(projectId string) (*projects.Project, error)
 	FindProject(req *projects.ProjectFilter) ([]*projects.Project, int)
 	InsertProject(req *projects.Project) (*projects.Project, error)
+	UpdateProject(req *projects.Project) (*projects.Project, error)
 	DeleteProject(projectId string) error
 }
 
@@ -121,6 +123,21 @@ func (r *projectsRepository) InsertProject(req *projects.Project) (*projects.Pro
 	}
 
 	project, err := r.FindOneProject(projectId)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+func (r *projectsRepository) UpdateProject(req *projects.Project) (*projects.Project, error) {
+	builder := projectsPatterns.UpdateProjectBuilder(r.db, req, r.filesUsecase)
+	engineer := projectsPatterns.UpdateProjectEngineer(builder)
+
+	if err := engineer.UpdateProject(); err != nil {
+		return nil, err
+	}
+
+	project, err := r.FindOneProject(strconv.Itoa(req.Id))
 	if err != nil {
 		return nil, err
 	}

@@ -177,6 +177,6 @@ func (m *moduleFactory) ProjectModule() {
 	router.Get("/:project_id", handler.FindOneProject)
 	router.Get("/", handler.FindProject)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProject)
-	// router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
+	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateProject)
 	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
 }

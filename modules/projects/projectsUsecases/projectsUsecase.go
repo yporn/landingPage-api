@@ -12,6 +12,7 @@ type IProjectsUsecase interface {
 	FindOneProject(projectId string) (*projects.Project, error)
 	FindProject(req *projects.ProjectFilter) *entities.PaginateRes
 	AddProject(req *projects.Project) (*projects.Project, error)
+	UpdateProject(req *projects.Project) (*projects.Project, error)
 	DeleteProject(projectId string) error
 }
 
@@ -51,6 +52,14 @@ func (u *projectsUsecase) FindProject(req *projects.ProjectFilter) *entities.Pag
 		TotalItem: count,
 		TotalPage: int(math.Ceil(float64(count) / float64(req.Limit))),
 	}
+}
+
+func (u *projectsUsecase) UpdateProject(req *projects.Project) (*projects.Project, error) {
+	project, err := u.projectsRepository.UpdateProject(req)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
 }
 
 func (u *projectsUsecase) DeleteProject(projectId string) error {

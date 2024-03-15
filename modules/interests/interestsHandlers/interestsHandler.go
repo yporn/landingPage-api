@@ -186,7 +186,7 @@ func (h *interestsHandler) UpdateInterest(c *fiber.Ctx) error {
 	}
 	req.Id = interestId
 
-	activity, err := h.interestsUsecase.UpdateInterest(req)
+	interest, err := h.interestsUsecase.UpdateInterest(req)
 	if err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
@@ -194,5 +194,5 @@ func (h *interestsHandler) UpdateInterest(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
-	return entities.NewResponse(c).Success(fiber.StatusOK, activity).Res()
+	return entities.NewResponse(c).Success(fiber.StatusOK, interest).Res()
 }

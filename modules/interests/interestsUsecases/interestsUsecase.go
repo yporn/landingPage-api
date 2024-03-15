@@ -55,11 +55,11 @@ func (u *interestsUsecase) AddInterest(req *interests.Interest) (*interests.Inte
 }
 
 func (u *interestsUsecase) UpdateInterest(req *interests.Interest) (*interests.Interest, error) {
-	activity, err := u.interestsRepository.UpdateInterest(req)
+	interest, err := u.interestsRepository.UpdateInterest(req)
 	if err != nil {
 		return nil, err
 	}
-	return activity, nil
+	return interest, nil
 }
 
 func (u *interestsUsecase) DeleteInterest(interestId string) error {
