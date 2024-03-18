@@ -15,6 +15,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/general/generalHandlers"
 	"github.com/yporn/sirarom-backend/modules/general/generalRepositories"
 	"github.com/yporn/sirarom-backend/modules/general/generalUsecases"
+	"github.com/yporn/sirarom-backend/modules/houseModels/houseModelsHandlers"
+	"github.com/yporn/sirarom-backend/modules/houseModels/houseModelsRepositories"
+	"github.com/yporn/sirarom-backend/modules/houseModels/houseModelsUsecases"
 	"github.com/yporn/sirarom-backend/modules/interests/interestsHandlers"
 	"github.com/yporn/sirarom-backend/modules/interests/interestsRepositories"
 	"github.com/yporn/sirarom-backend/modules/interests/interestsUsecases"
@@ -44,6 +47,7 @@ type IModuleFactory interface {
 	BannerModule()
 	ActivityModule()
 	ProjectModule()
+	HouseModelModule()
 }
 
 type moduleFactory struct {
@@ -176,7 +180,22 @@ func (m *moduleFactory) ProjectModule() {
 
 	router.Get("/:project_id", handler.FindOneProject)
 	router.Get("/", handler.FindProject)
+	router.Get("/:project_id/house_models", handler.FindProjectHouseModel)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProject)
 	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateProject)
 	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
+}
+
+func (m *moduleFactory) HouseModelModule() {
+	repository := houseModelsRepositories.HouseModelsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := houseModelsUsecases.HouseModelsUsecases(repository)
+	handler := houseModelsHandlers.HouseModelsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/house_models")
+
+	router.Get("/:house_model_id", handler.FindOneHouseModel)
+	router.Get("/projects/:project_id", handler.FindHouseModel)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
+	// router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateProject)
+	// router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
 }

@@ -20,6 +20,7 @@ type IProjectRepository interface {
 	InsertProject(req *projects.Project) (*projects.Project, error)
 	UpdateProject(req *projects.Project) (*projects.Project, error)
 	DeleteProject(projectId string) error
+	FindProjectHouseModel(projectID string) (*projects.Project, error)
 }
 
 type projectsRepository struct {
@@ -87,7 +88,96 @@ func (r *projectsRepository) FindOneProject(projectId string) (*projects.Project
 					FROM "project_images" "i"
 					WHERE "i"."project_id" = "p"."id"
 				) AS "it"
-			) AS "images"
+			) AS "images",
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("hm")), '[]'::json)
+				FROM (
+					SELECT
+						"hm".*,
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("hmti")), '[]'::json)
+							FROM (
+								SELECT
+									"hmti".*
+								FROM "house_model_type_items" "hmti"
+								WHERE "hmti"."house_model_id" = "hm"."id"
+							) AS "hmti"
+						) AS "type_items",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ihm")), '[]'::json)
+							FROM (
+								SELECT
+									"ihm".*
+								FROM "house_model_images" "ihm"
+								WHERE "ihm"."house_model_id" = "hm"."id"
+							) AS "ihm"
+						) AS "house_images"
+					FROM "house_models" "hm"
+					WHERE "hm"."project_id" = "p"."id"
+				) AS "hm"
+			) AS "house_models"
+			FROM "projects" "p"
+		WHERE "p"."id" = $1
+	) AS "t";
+	`
+	projectBytes := make([]byte, 0)
+	project := &projects.Project{
+		Images:          make([]*entities.Image, 0),
+		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
+		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
+	}
+
+	if err := r.db.Get(&projectBytes, query, projectId); err != nil {
+		return nil, fmt.Errorf("get project failed: %v", err)
+	}
+	if err := json.Unmarshal(projectBytes, &project); err != nil {
+		return nil, fmt.Errorf("unmarshal project failed: %v", err)
+	}
+	return project, nil
+}
+
+func (r *projectsRepository) FindProjectHouseModel(projectId string) (*projects.Project, error) {
+	query := `
+	SELECT
+		to_jsonb("t")
+	FROM (
+		SELECT
+			"p".*,
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("hm")), '[]'::json)
+				FROM (
+					SELECT
+						"hm".*,
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("hmti")), '[]'::json)
+							FROM (
+								SELECT
+									"hmti".*
+								FROM "house_model_type_items" "hmti"
+								WHERE "hmti"."house_model_id" = "hm"."id"
+								AND ("hmti"."room_type" = 'ห้องนอน' OR "hmti"."room_type" = 'ห้องน้ำ' OR "hmti"."room_type" = 'ที่จอดรถ')
+							) AS "hmti"
+						) AS "type_items",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ihm")), '[]'::json)
+							FROM (
+								SELECT
+									"ihm".*
+								FROM "house_model_images" "ihm"
+								WHERE "ihm"."house_model_id" = "hm"."id"
+							) AS "ihm"
+						) AS "house_images"
+					FROM "house_models" "hm"
+					WHERE "hm"."project_id" = "p"."id"
+				) AS "hm"
+			) AS "house_models"
 			FROM "projects" "p"
 		WHERE "p"."id" = $1
 	) AS "t";

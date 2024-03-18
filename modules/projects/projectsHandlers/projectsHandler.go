@@ -30,6 +30,7 @@ type IProjectsHandler interface {
 	AddProject(c *fiber.Ctx) error
 	UpdateProject(c *fiber.Ctx) error
 	DeleteProject(c *fiber.Ctx) error
+	FindProjectHouseModel(c *fiber.Ctx) error
 }
 
 type projectsHandler struct {
@@ -59,6 +60,21 @@ func (h *projectsHandler) FindOneProject(c *fiber.Ctx) error {
 	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, project).Res()
 }
+
+func (h *projectsHandler) FindProjectHouseModel(c *fiber.Ctx) error {
+	projectId := strings.Trim(c.Params("project_id"), " ")
+
+	project, err := h.projectsUsecases.FindProjectHouseModel(projectId)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(findOneProjectErr),
+			err.Error(),
+		).Res()
+	}
+	return entities.NewResponse(c).Success(fiber.StatusOK, project).Res()
+}
+
 
 func (h *projectsHandler) FindProject(c *fiber.Ctx) error {
 	req := &projects.ProjectFilter{

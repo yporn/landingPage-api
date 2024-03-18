@@ -17,6 +17,7 @@ TRUNCATE TABLE "house_model_images" CASCADE;
 TRUNCATE TABLE "house_model_type_items" CASCADE;
 TRUNCATE TABLE "house_model_plans" CASCADE;
 TRUNCATE TABLE "house_model_plans_items" CASCADE;
+TRUNCATE TABLE "house_model_plan_images" CASCADE;
 TRUNCATE TABLE "interests" CASCADE;
 TRUNCATE TABLE "interest_images" CASCADE;
 TRUNCATE TABLE "careers" CASCADE;

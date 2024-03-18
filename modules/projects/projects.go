@@ -1,9 +1,11 @@
 package projects
 
 import (
-	"github.com/yporn/sirarom-backend/modules/entities"
-)
+	"encoding/json"
 
+	"github.com/yporn/sirarom-backend/modules/entities"
+	"github.com/yporn/sirarom-backend/modules/houseModels"
+)
 
 type Project struct {
 	Id              int                       `db:"id" json:"id"`
@@ -28,6 +30,7 @@ type Project struct {
 	HouseTypeItem   []*ProjectHouseTypeItem   `json:"house_type_items"`
 	DescAreaItem    []*ProjectDescAreaItem    `json:"area_items"`
 	ComfortableItem []*ProjectComfortableItem `json:"facilities_items"`
+	HouseModel      []*houseModels.HouseModel `json:"house_models"`
 }
 
 type ProjectHouseTypeItem struct {
@@ -49,10 +52,11 @@ type ProjectComfortableItem struct {
 }
 
 type ProjectFilter struct {
-	Search    string `query:"search"` // name,status_project,type_project,location
-	StatusProject    string `query:"status_project"`
-	// StartDate string `query:"start_date"`
-	// EndDate   string `query:"end_date"`
+	Search        string `query:"search"` // name,status_project,type_project,location
+	StatusProject string `query:"status_project"`
 	*entities.PaginationReq
 	*entities.SortReq
+}
+type ProjectHouseModelResult struct {
+    ProjectHouseModel json.RawMessage `db:"project_house_model"`
 }

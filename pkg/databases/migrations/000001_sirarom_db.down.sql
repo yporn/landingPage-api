@@ -14,7 +14,8 @@ DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_models_table ON "house_mod
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_images_table ON "house_model_images";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_type_items_table ON "house_model_type_items";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_plans_table ON "house_model_plans";
-DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_plans_items_table ON "house_model_plans_items";
+DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_plans_items_table ON "house_model_plan_items";
+DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_plans_items_table ON "house_model_plan_images";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_interests_table ON "interests";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_interest_images_table ON "interest_images";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_careers_table ON "careers";

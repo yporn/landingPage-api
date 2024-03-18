@@ -180,6 +180,7 @@ func (b *insertProjectBuilder) insertComfortableItem() error {
 
 	return nil
 }
+
 func (b *insertProjectBuilder) insertAttachment() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
@@ -221,6 +222,7 @@ func (b *insertProjectBuilder) insertAttachment() error {
 	}
 	return nil
 }
+
 func (b *insertProjectBuilder) commit() error {
 	if err := b.tx.Commit(); err != nil {
 		return err
