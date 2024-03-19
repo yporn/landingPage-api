@@ -25,11 +25,12 @@ type HouseModelTypeItem struct {
 }
 
 type HouseModelPlan struct {
-	Id       int                   `db:"id" json:"id"`
-	Floor    string                `db:"floor" json:"floor"`
-	Size     string                `db:"size" json:"size"`
-	Images   []*entities.Image     `json:"plan_images"`
-	PlanItem []*HouseModelPlanItem `json:"plan_items"`
+	Id           int                   `db:"id" json:"id"`
+	HouseModelId int                   `db:"house_model_id" json:"house_model_id"`
+	Floor        string                `db:"floor" json:"floor"`
+	Size         string                `db:"size" json:"size"`
+	Images       []*entities.Image     `json:"plan_images"`
+	PlanItem     []*HouseModelPlanItem `json:"plan_items"`
 }
 
 type HouseModelPlanItem struct {

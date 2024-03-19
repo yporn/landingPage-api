@@ -2,6 +2,7 @@ package projectsHandlers
 
 import (
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -225,7 +226,7 @@ func (h *projectsHandler) DeleteProject(c *fiber.Ctx) error {
 	deleteFileReq := make([]*files.DeleteFileReq, 0)
 	for _, p := range project.Images {
 		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-			Destination: fmt.Sprintf("projects/%s", p.FileName),
+			Destination: fmt.Sprintf("projects/%s", path.Base(p.Url)),
 		})
 	}
 

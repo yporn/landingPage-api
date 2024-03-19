@@ -196,6 +196,6 @@ func (m *moduleFactory) HouseModelModule() {
 	router.Get("/:house_model_id", handler.FindOneHouseModel)
 	router.Get("/projects/:project_id", handler.FindHouseModel)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
-	// router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateProject)
-	// router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
+	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateHouseModel)
+	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
 }

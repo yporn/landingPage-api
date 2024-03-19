@@ -1,8 +1,10 @@
 package houseModelsRepositories
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/yporn/sirarom-backend/config"
@@ -15,6 +17,8 @@ type IHouseModelsRepository interface {
 	FindOneHouseModel(houseId string) (*houseModels.HouseModel, error)
 	InsertHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
 	FindHouseModel(projectId string, req *houseModels.HouseModelFilter) ([]*houseModels.HouseModel, int)
+	UpdateHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
+	DeleteHouseModel(houseId string) error
 }
 
 type houseModelsRepository struct {
@@ -130,4 +134,28 @@ func (r *houseModelsRepository) InsertHouseModel(req *houseModels.HouseModel) (*
 		return nil, err
 	}
 	return houseModel, nil
+}
+
+func (r *houseModelsRepository) UpdateHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error) {
+	builder := houseModelsPatterns.UpdateHouseModelBuilder(r.db, req, r.filesUsecase)
+	engineer := houseModelsPatterns.UpdateHouseModelEngineer(builder)
+
+	if err := engineer.UpdateHouseModel(); err != nil {
+		return nil, err
+	}
+
+	houseModel, err := r.FindOneHouseModel(strconv.Itoa(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	return houseModel, nil
+}
+
+func (r *houseModelsRepository) DeleteHouseModel(houseId string) error {
+	query := `DELETE FROM "house_models" WHERE "id" = $1;`
+
+	if _, err := r.db.ExecContext(context.Background(), query, houseId); err != nil {
+		return fmt.Errorf("delete house_models failed: %v", err)
+	}
+	return nil
 }
