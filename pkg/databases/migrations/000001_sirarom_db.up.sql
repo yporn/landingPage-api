@@ -31,111 +31,279 @@ CREATE TYPE "type_project" AS ENUM('present', 'future');
 CREATE TYPE "status_career" AS ENUM('opening', 'closed');
 
 CREATE TABLE "users" (
-    "id" VARCHAR PRIMARY KEY DEFAULT NEXTVAL ('users_id_seq'), "username" VARCHAR UNIQUE NOT NULL, "password" VARCHAR, "name" VARCHAR, "tel" VARCHAR, "email" VARCHAR UNIQUE, "role_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" VARCHAR PRIMARY KEY DEFAULT NEXTVAL ('users_id_seq'), 
+    "username" VARCHAR UNIQUE NOT NULL, 
+    "password" VARCHAR, 
+    "name" VARCHAR, 
+    "tel" VARCHAR, 
+    "email" VARCHAR UNIQUE, 
+    "role_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "oauth" (
-    "id" uuid NOT NULL UNIQUE PRIMARY KEY DEFAULT uuid_generate_v4 (), "user_id" VARCHAR NOT NULL, "access_token" VARCHAR NOT NULL, "refresh_token" VARCHAR NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" uuid NOT NULL UNIQUE PRIMARY KEY DEFAULT uuid_generate_v4 (), 
+    "user_id" VARCHAR NOT NULL, 
+    "access_token" VARCHAR NOT NULL, 
+    "refresh_token" VARCHAR NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "roles" (
-    "id" SERIAL PRIMARY KEY, "title" VARCHAR NOT NULL UNIQUE
+    "id" SERIAL PRIMARY KEY, 
+    "title" VARCHAR NOT NULL UNIQUE
 );
 
 CREATE TABLE "banners" (
-    "id" SERIAL PRIMARY KEY, "index" INTEGER, "delay" INTEGER, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "index" INTEGER, 
+    "delay" INTEGER, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "banner_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "banner_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "banner_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "brands" (
-    "id" SERIAL PRIMARY KEY, "name" VARCHAR, "index" VARCHAR, "filename" VARCHAR, "url" VARCHAR, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "name" VARCHAR, 
+    "index" INTEGER, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "data_settings" (
-    "id" SERIAL PRIMARY KEY, "tel" VARCHAR, "email" VARCHAR, "link_facebook" VARCHAR, "link_instagram" VARCHAR, "link_twitter" VARCHAR, "link_tiktok" VARCHAR, "link_line" VARCHAR, "link_website" VARCHAR, "filename" VARCHAR, "url" VARCHAR
+    "id" SERIAL PRIMARY KEY, 
+    "tel" VARCHAR, 
+    "email" VARCHAR, 
+    "link_facebook" VARCHAR, 
+    "link_instagram" VARCHAR, 
+    "link_twitter" VARCHAR, 
+    "link_tiktok" VARCHAR, 
+    "link_line" VARCHAR, 
+    "link_website" VARCHAR, 
+    "filename" VARCHAR, 
+    "url" VARCHAR
 );
 
 CREATE TABLE "projects" (
-    "id" SERIAL PRIMARY KEY, "name" VARCHAR, "index" INTEGER, "heading" VARCHAR, "text" VARCHAR, "location" TEXT, "price" INTEGER, "status_project" status_project NOT NULL, "type_project" type_project NOT NULL, "description" TEXT, "name_facebook" VARCHAR, "link_facebook" VARCHAR, "tel" VARCHAR, "address" TEXT, "link_location" VARCHAR, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "name" VARCHAR, 
+    "index" INTEGER, 
+    "heading" VARCHAR, 
+    "text" VARCHAR, 
+    "location" TEXT, 
+    "price" INTEGER, 
+    "status_project" status_project NOT NULL, 
+    "type_project" type_project NOT NULL, 
+    "description" TEXT, 
+    "name_facebook" VARCHAR, 
+    "link_facebook" VARCHAR, 
+    "tel" VARCHAR, 
+    "address" TEXT, 
+    "link_location" VARCHAR, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "project_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "project_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "project_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "project_house_type_items" (
-    "id" SERIAL PRIMARY KEY, "project_id" INTEGER, "name" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "project_id" INTEGER, 
+    "name" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "project_desc_area_items" (
-    "id" SERIAL PRIMARY KEY, "project_id" INTEGER, "item" VARCHAR, "amount" VARCHAR, "unit" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "project_id" INTEGER, 
+    "item" VARCHAR, 
+    "amount" VARCHAR, 
+    "unit" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "project_comfortable_items" (
-    "id" SERIAL PRIMARY KEY, "project_id" INTEGER, "item" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "project_id" INTEGER, 
+    "item" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_models" (
-    "id" SERIAL PRIMARY KEY, "project_id" INTEGER, "name" VARCHAR, "description" TEXT, "link_video" VARCHAR, "link_virtual_tour" VARCHAR, "display" display NOT NULL, "index" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "project_id" INTEGER, 
+    "name" VARCHAR, 
+    "description" TEXT, 
+    "link_video" VARCHAR, 
+    "link_virtual_tour" VARCHAR, 
+    "display" display NOT NULL,
+    "index" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_model_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "house_model_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "house_model_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_model_type_items" (
-    "id" SERIAL PRIMARY KEY, "house_model_id" INTEGER, "room_type" VARCHAR, "amount" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "house_model_id" INTEGER, 
+    "room_type" VARCHAR, 
+    "amount" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_model_plans" (
-    "id" SERIAL PRIMARY KEY, "house_model_id" INTEGER, "floor" VARCHAR, "size" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "house_model_id" INTEGER, 
+    "floor" VARCHAR, 
+    "size" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_model_plan_items" (
-    "id" SERIAL PRIMARY KEY, "house_model_plan_id" INTEGER, "room_type" VARCHAR, "amount" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "house_model_plan_id" INTEGER, 
+    "room_type" VARCHAR, 
+    "amount" VARCHAR,
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "house_model_plan_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "house_model_plan_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "house_model_plan_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "interests" (
-    "id" SERIAL PRIMARY KEY, "bank_name" VARCHAR, "interest_rate" VARCHAR, "note" VARCHAR, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "bank_name" VARCHAR, 
+    "interest_rate" VARCHAR, 
+    "note" VARCHAR, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "interest_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "interest_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "interest_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "careers" (
-    "id" SERIAL PRIMARY KEY, "position" VARCHAR, "amount" VARCHAR, "location" VARCHAR, "description" TEXT, "qualification" TEXT, "start_date" DATE, "end_date" DATE, "status" status_career NOT NULL, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "position" VARCHAR, 
+    "amount" VARCHAR, 
+    "location" VARCHAR, 
+    "description" TEXT, 
+    "qualification" TEXT, 
+    "start_date" DATE, 
+    "end_date" DATE, 
+    "status" status_career NOT NULL, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "promotions" (
-    "id" SERIAL PRIMARY KEY, "index" VARCHAR, "heading" VARCHAR, "description" TEXT, "start_date" DATE, "end_date" DATE, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "index" INTEGER, 
+    "heading" VARCHAR, 
+    "description" TEXT, 
+    "start_date" DATE, 
+    "end_date" DATE, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "promotion_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "promotion_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "promotion_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "promotion_free_items" (
-    "id" SERIAL PRIMARY KEY, "promotion_id" INTEGER, "description" VARCHAR, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "promotion_id" INTEGER, 
+    "description" VARCHAR, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "promotion_house_models" (
-    "id" SERIAL PRIMARY KEY, "promotion_id" INTEGER, "house_model_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "promotion_id" INTEGER, 
+    "house_model_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "activities" (
-    "id" SERIAL PRIMARY KEY, "index" INTEGER, "heading" VARCHAR, "description" TEXT, "start_date" DATE, "end_date" DATE, "video_link" VARCHAR, "display" display NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "index" INTEGER, 
+    "heading" VARCHAR, 
+    "description" TEXT, 
+    "start_date" DATE, 
+    "end_date" DATE, 
+    "video_link" VARCHAR, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "activities_images" (
-    "id" SERIAL PRIMARY KEY, "filename" VARCHAR, "url" VARCHAR, "activity_id" INTEGER, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "activity_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 ALTER TABLE "users"
@@ -258,6 +426,7 @@ EXECUTE PROCEDURE set_updated_at_column ();
 CREATE TRIGGER set_updated_at_timestamp_house_model_plan_images_table BEFORE
 UPDATE ON "house_model_plan_images" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
+
 CREATE TRIGGER set_updated_at_timestamp_interests_table BEFORE
 UPDATE ON "interests" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();

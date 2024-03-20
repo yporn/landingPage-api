@@ -31,6 +31,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/projects/projectsHandlers"
 	"github.com/yporn/sirarom-backend/modules/projects/projectsRepositories"
 	"github.com/yporn/sirarom-backend/modules/projects/projectsUsecases"
+	"github.com/yporn/sirarom-backend/modules/promotions/promotionsHandlers"
+	"github.com/yporn/sirarom-backend/modules/promotions/promotionsRepositories"
+	"github.com/yporn/sirarom-backend/modules/promotions/promotionsUsecases"
 	"github.com/yporn/sirarom-backend/modules/users/usersHandlers"
 	"github.com/yporn/sirarom-backend/modules/users/usersRepositories"
 	"github.com/yporn/sirarom-backend/modules/users/usersUsecases"
@@ -48,6 +51,7 @@ type IModuleFactory interface {
 	ActivityModule()
 	ProjectModule()
 	HouseModelModule()
+	PromotionModule()
 }
 
 type moduleFactory struct {
@@ -198,4 +202,18 @@ func (m *moduleFactory) HouseModelModule() {
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
 	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateHouseModel)
 	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
+}
+
+func (m *moduleFactory) PromotionModule() {
+	repository := promotionsRepositories.PromotionsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := promotionsUsecases.PromotionsUsecase(repository)
+	handler := promotionsHandlers.PromotionsHandlers(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/promotions")
+
+	router.Get("/:promotion_id", handler.FindOnePromotion)
+	// router.Get("/projects/:project_id", handler.FindHouseModel)
+	// router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
+	// router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateHouseModel)
+	// router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
 }
