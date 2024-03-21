@@ -251,9 +251,9 @@ CREATE TABLE "promotions" (
     "id" SERIAL PRIMARY KEY, 
     "index" INTEGER, 
     "heading" VARCHAR, 
-    "description" TEXT, 
-    "start_date" DATE, 
-    "end_date" DATE, 
+    "description" VARCHAR, 
+    "start_date" VARCHAR, 
+    "end_date" VARCHAR, 
     "display" display NOT NULL, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()

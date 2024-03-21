@@ -83,13 +83,13 @@ INSERT INTO "house_model_type_items"
 	("house_model_id", "room_type", "amount")
 VALUES 
 	(1, 'ห้องนอน', '2'),
-	(1, 'ห้องน้ำ', '2')
+	(1, 'ห้องน้ำ', '2');
 	
-INSERT into "house_model_plans"
+INSERT INTO "house_model_plans"
 	("house_model_id", "floor", "size")
 values
 	(1, '1', '52 ตร.ม'),
-	(1, '2', '58 ตร.ม')
+	(1, '2', '58 ตร.ม');
 	
 INSERT into "house_model_plan_items"
 	("house_model_plan_id", "room_type", "amount")
@@ -97,22 +97,22 @@ values
 	(1, 'ห้องนอน', '1'),
 	(1, 'ห้องน้ำ', '2'),
 	(2, 'ห้องนอน', '2'),
-	(2, 'ห้องน้ำ', '2')
+	(2, 'ห้องน้ำ', '2');
 
 INSERT INTO promotions
 	("index", "heading", "description", "start_date", "end_date", "display")
 VALUES 
-	(1, 'Gareth Lang', 'No, you cant insert into multiple tables in one MySQL command. You can however use transactions.','2024/03/12', '2024/04/13', 'published')
+	(1, 'Gareth Lang', 'No, you cant insert into multiple tables in one MySQL command. You can however use transactions.','2024/03/12', '2024/04/13', 'published');
 
 INSERT INTO promotion_house_models 
 	("promotion_id", "house_model_id")
-V 
-	(1, 65)
+VALUES
+	(1, 1);
 	
 insert into promotion_free_items 
 	("promotion_id", "description")
 values
-	(1, 'ฟรีโอน')
+	(1, 'ฟรีโอน');
 
 INSERT INTO interests (bank_name, interest_rate, note, display)
 VALUES ('Bank A', '5', 'Interest rate for savings account', 'published'),

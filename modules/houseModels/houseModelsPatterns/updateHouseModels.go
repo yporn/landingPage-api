@@ -64,7 +64,7 @@ func (b *updateHouseModelBuilder) initTransaction() error {
 
 func (b *updateHouseModelBuilder) initQuery() {
 	b.query += `
-	UPDATE "house_models" SET`
+	UPDATE "house_models" SET `
 }
 
 func (b *updateHouseModelBuilder) updateQuery() {

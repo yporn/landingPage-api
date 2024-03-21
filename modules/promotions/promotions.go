@@ -2,28 +2,49 @@ package promotions
 
 import (
 	"github.com/yporn/sirarom-backend/modules/entities"
-	"github.com/yporn/sirarom-backend/modules/houseModels"
 )
 
 type Promotion struct {
-	Id          int               `db:"id" json:"id"`
-	Index       int               `db:"index" json:"index"`
-	Heading     string            `db:"heading" json:"heading"`
-	Description string            `db:"description" json:"description"`
-	StartDate   string            `db:"start_date" json:"start_date"`
-	EndDate     string            `db:"end_date" json:"end_date"`
-	Display     string            `db:"display" json:"display"`
-	Images      []*entities.Image `json:"house_images"`
-	HouseModel  []HouseModel      `json:"house_model"`
-}
-
-type HouseModel struct {
-	Id         int                     `db:"id" json:"id"`
-	HouseModel *houseModels.HouseModel `db:"house_model" json:"house_model"`
+	Id          int                    `db:"id" json:"id"`
+	Index       int                    `db:"index" json:"index"`
+	Heading     string                 `db:"heading" json:"heading"`
+	Description string                 `db:"description" json:"description"`
+	StartDate   string                 `db:"start_date" json:"start_date"`
+	EndDate     string                 `db:"end_date" json:"end_date"`
+	Display     string                 `db:"display" json:"display"`
+	Images      []*entities.Image      `json:"promotion_images"`
+	HouseModel  []*PromotionHouseModel `json:"house_models"`
+	FreeItem    []*PromotionFreeItem   `json:"free_items"`
 }
 
 type PromotionFreeItem struct {
 	Id          int    `db:"id" json:"id"`
 	PromotionId int    `db:"promotion_id" json:"promotion_id"`
 	Description string `db:"description" json:"description"`
+}
+
+type PromotionHouseModel struct {
+	Id           int           `db:"id" json:"id"`
+	PromotionId  int           `db:"promotion_id" json:"promotion_id"`
+	HouseModelId int           `db:"house_model_id" json:"house_model_id"`
+	HouseModel   []*HouseModel `json:"house_model_name"`
+}
+
+type HouseModel struct {
+	Id        int               `json:"id"`
+	Name      string            `json:"name"`
+	HouseType []*HouseModelType `json:"house_type"`
+}
+
+type HouseModelType struct {
+	Id       int    `json:"id"`
+	RoomType string `json:"room_type"`
+	Amount   string `json:"amount"`
+}
+
+type PromotionFilter struct {
+	Id     string `query:"id"`
+	Search string `query:"search"` // Heading
+	*entities.PaginationReq
+	*entities.SortReq
 }

@@ -211,9 +211,9 @@ func (m *moduleFactory) PromotionModule() {
 
 	router := m.r.Group("/promotions")
 
+	router.Get("/", handler.FindPromotion)
 	router.Get("/:promotion_id", handler.FindOnePromotion)
-	// router.Get("/projects/:project_id", handler.FindHouseModel)
-	// router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
-	// router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateHouseModel)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddPromotion)
+	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdatePromotion)
 	// router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
 }
