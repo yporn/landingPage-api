@@ -35,7 +35,7 @@ type promotionsHandlers struct {
 	filesUsecase      filesUsecases.IFilesUsecase
 }
 
-func PromotionsHandlers(cfg config.IConfig, promotionsUsecase promotionsUsecases.IPromotionsUsecase, filesUsecase filesUsecases.IFilesUsecase) IPromotionsHandler {
+func PromotionsHandler(cfg config.IConfig, promotionsUsecase promotionsUsecases.IPromotionsUsecase, filesUsecase filesUsecases.IFilesUsecase) IPromotionsHandler {
 	return &promotionsHandlers{
 		cfg: cfg,
 		promotionsUsecase: promotionsUsecase,

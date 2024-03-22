@@ -137,16 +137,19 @@ func (r *promotionsRepository) InsertPromotion(req *promotions.Promotion) (*prom
 }
 
 func (r *promotionsRepository) UpdatePromotion(req *promotions.Promotion) (*promotions.Promotion, error) {
-	builder := promotionsPatterns.UpdatePromotionBuilder(r.db, req, r.filesUsecase)
-	engineer := promotionsPatterns.UpdatePromotionEngineer(builder)
+    // Initialize the update builder
+    builder := promotionsPatterns.UpdatePromotionBuilder(r.db, req, r.filesUsecase)
+    engineer := promotionsPatterns.UpdatePromotionEngineer(builder)
 
-	if err := engineer.UpdatePromotion(); err != nil {
-		return nil, err
-	}
+    // Perform the update
+    if err := engineer.UpdatePromotion(); err != nil {
+        return nil, err
+    }
 
-	promotion, err := r.FindOnePromotion(strconv.Itoa(req.Id))
-	if err != nil {
-		return nil, err
-	}
-	return promotion, nil
+    // Retrieve the updated promotion
+    promotion, err := r.FindOnePromotion(strconv.Itoa(req.Id))
+    if err != nil {
+        return nil, err
+    }
+    return promotion, nil
 }

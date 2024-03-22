@@ -207,13 +207,13 @@ func (m *moduleFactory) HouseModelModule() {
 func (m *moduleFactory) PromotionModule() {
 	repository := promotionsRepositories.PromotionsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := promotionsUsecases.PromotionsUsecase(repository)
-	handler := promotionsHandlers.PromotionsHandlers(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := promotionsHandlers.PromotionsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
 
 	router := m.r.Group("/promotions")
 
 	router.Get("/", handler.FindPromotion)
 	router.Get("/:promotion_id", handler.FindOnePromotion)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddPromotion)
-	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdatePromotion)
+	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), handler.UpdatePromotion)
 	// router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
 }

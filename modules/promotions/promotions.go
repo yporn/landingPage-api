@@ -5,13 +5,13 @@ import (
 )
 
 type Promotion struct {
-	Id          int                    `db:"id" json:"id"`
-	Index       int                    `db:"index" json:"index"`
-	Heading     string                 `db:"heading" json:"heading"`
-	Description string                 `db:"description" json:"description"`
-	StartDate   string                 `db:"start_date" json:"start_date"`
-	EndDate     string                 `db:"end_date" json:"end_date"`
-	Display     string                 `db:"display" json:"display"`
+	Id          int                    `db:"id" json:"id" form:"id"`
+	Index       int                    `db:"index" json:"index" form:"index" `
+	Heading     string                 `db:"heading" json:"heading" form:"heading"`
+	Description string                 `db:"description" json:"description" form:"description"`
+	StartDate   string                 `db:"start_date" json:"start_date" form:"start_date"`
+	EndDate     string                 `db:"end_date" json:"end_date" form:"end_date"`
+	Display     string                 `db:"display" json:"display" form:"display"`
 	Images      []*entities.Image      `json:"promotion_images"`
 	HouseModel  []*PromotionHouseModel `json:"house_models"`
 	FreeItem    []*PromotionFreeItem   `json:"free_items"`
