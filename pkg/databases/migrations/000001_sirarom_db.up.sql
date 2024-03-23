@@ -74,13 +74,20 @@ CREATE TABLE "banner_images" (
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
-CREATE TABLE "brands" (
+CREATE TABLE "logos" (
     "id" SERIAL PRIMARY KEY, 
     "name" VARCHAR, 
     "index" INTEGER, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE "logo_images" (
+    "id" SERIAL PRIMARY KEY, 
     "filename" VARCHAR, 
     "url" VARCHAR, 
-    "display" display NOT NULL, 
+    "logo_id" INTEGER, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
@@ -94,9 +101,16 @@ CREATE TABLE "data_settings" (
     "link_twitter" VARCHAR, 
     "link_tiktok" VARCHAR, 
     "link_line" VARCHAR, 
-    "link_website" VARCHAR, 
+    "link_website" VARCHAR 
+);
+
+CREATE TABLE "data_setting_images" (
+    "id" SERIAL PRIMARY KEY, 
     "filename" VARCHAR, 
-    "url" VARCHAR
+    "url" VARCHAR, 
+    "data_setting_id" INTEGER, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "projects" (
@@ -315,6 +329,12 @@ ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 ALTER TABLE "banner_images"
 ADD FOREIGN KEY ("banner_id") REFERENCES "banners" ("id") ON DELETE CASCADE;
 
+ALTER TABLE "logo_images"
+ADD FOREIGN KEY ("logo_id") REFERENCES "logos" ("id") ON DELETE CASCADE;
+
+ALTER TABLE "data_setting_images"
+ADD FOREIGN KEY ("data_setting_id") REFERENCES "data_settings" ("id") ON DELETE CASCADE;
+
 ALTER TABLE "project_images"
 ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
@@ -379,8 +399,8 @@ CREATE TRIGGER set_updated_at_timestamp_banner_images_table BEFORE
 UPDATE ON "banner_images" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
 
-CREATE TRIGGER set_updated_at_timestamp_brands_table BEFORE
-UPDATE ON "brands" FOR EACH ROW
+CREATE TRIGGER set_updated_at_timestamp_logos_table BEFORE
+UPDATE ON "logos" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
 
 CREATE TRIGGER set_updated_at_timestamp_projects_table BEFORE

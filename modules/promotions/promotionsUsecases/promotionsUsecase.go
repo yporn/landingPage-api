@@ -13,6 +13,7 @@ type IPromotionsUsecase interface {
 	FindPromotion(req *promotions.PromotionFilter) *entities.PaginateRes 
 	AddPromotion(req *promotions.Promotion) (*promotions.Promotion, error)
 	UpdatePromotion(req *promotions.Promotion) (*promotions.Promotion, error)
+	DeletePromotion(promotionId string) error 
 }
 
 type promotionsUsecase struct {
@@ -59,4 +60,11 @@ func (u *promotionsUsecase) UpdatePromotion(req *promotions.Promotion) (*promoti
 		return nil, err
 	}
 	return promotion, nil
+}
+
+func (u *promotionsUsecase) DeletePromotion(promotionId string) error {
+	if err := u.promotionsRepository.DeletePromotion(promotionId); err != nil {
+		return err
+	}
+	return nil
 }

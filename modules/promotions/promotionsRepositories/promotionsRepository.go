@@ -1,6 +1,7 @@
 package promotionsRepositories
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -17,6 +18,7 @@ type IPromotionsRepository interface {
 	FindPromotion(req *promotions.PromotionFilter) ([]*promotions.Promotion, int)
 	InsertPromotion(req *promotions.Promotion) (*promotions.Promotion, error)
 	UpdatePromotion(req *promotions.Promotion) (*promotions.Promotion, error) 
+	DeletePromotion(promotionId string) error
 }
 
 type promotionsRepository struct {
@@ -152,4 +154,14 @@ func (r *promotionsRepository) UpdatePromotion(req *promotions.Promotion) (*prom
         return nil, err
     }
     return promotion, nil
+}
+
+
+func (r *promotionsRepository) DeletePromotion(promotionId string) error {
+	query := `DELETE FROM "promotions" WHERE "id" = $1;`
+
+	if _, err := r.db.ExecContext(context.Background(), query, promotionId); err != nil {
+		return fmt.Errorf("delete promotion failed: %v", err)
+	}
+	return nil
 }

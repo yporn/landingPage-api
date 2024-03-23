@@ -2,6 +2,7 @@ package activitiesHandlers
 
 import (
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -165,7 +166,7 @@ func (h *activitiesHandler) DeleteActivity(c *fiber.Ctx) error {
 	deleteFileReq := make([]*files.DeleteFileReq, 0)
 	for _, p := range activity.Images {
 		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-			Destination: fmt.Sprintf("activity/%s", p.FileName),
+			Destination: fmt.Sprintf("activities/%s", path.Base(p.Url)),
 		})
 	}
 

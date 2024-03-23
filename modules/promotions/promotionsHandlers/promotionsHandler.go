@@ -1,12 +1,15 @@
 package promotionsHandlers
 
 import (
+	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yporn/sirarom-backend/config"
 	"github.com/yporn/sirarom-backend/modules/entities"
+	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/promotions"
 	"github.com/yporn/sirarom-backend/modules/promotions/promotionsUsecases"
@@ -27,6 +30,7 @@ type IPromotionsHandler interface {
 	FindPromotion(c *fiber.Ctx) error 
 	AddPromotion(c *fiber.Ctx) error
 	UpdatePromotion(c *fiber.Ctx) error
+	DeletePromotion(c *fiber.Ctx) error 
 }
 
 type promotionsHandlers struct {
@@ -156,4 +160,42 @@ func (h *promotionsHandlers) UpdatePromotion(c *fiber.Ctx) error {
 		).Res()
 	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, promotion).Res()
+}
+
+func (h *promotionsHandlers) DeletePromotion(c *fiber.Ctx) error {
+	promotionId := strings.Trim(c.Params("promotion_id"), " ")
+
+	promotion, err := h.promotionsUsecase.FindOnePromotion(promotionId)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deletePromotionErr),
+			err.Error(),
+		).Res()
+	}
+
+	deleteFileReq := make([]*files.DeleteFileReq, 0)
+	for _, p := range promotion.Images {
+		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
+			Destination: fmt.Sprintf("promotions/%s", path.Base(p.Url)),
+		})
+	}
+
+	if err := h.filesUsecase.DeleteFileOnStorage(deleteFileReq); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deletePromotionErr),
+			err.Error(),
+		).Res()
+	}
+
+	if err := h.promotionsUsecase.DeletePromotion(promotionId); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deletePromotionErr),
+			err.Error(),
+		).Res()
+	}
+
+	return entities.NewResponse(c).Success(fiber.StatusNoContent, nil).Res()
 }

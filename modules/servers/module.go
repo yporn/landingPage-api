@@ -24,6 +24,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/jobs/jobsHandlers"
 	"github.com/yporn/sirarom-backend/modules/jobs/jobsRepositories"
 	"github.com/yporn/sirarom-backend/modules/jobs/jobsUsecases"
+	"github.com/yporn/sirarom-backend/modules/logos/logosHandlers"
+	"github.com/yporn/sirarom-backend/modules/logos/logosRepositories"
+	"github.com/yporn/sirarom-backend/modules/logos/logosUsecases"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresHandlers"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresRepositories"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresUsecases"
@@ -52,6 +55,7 @@ type IModuleFactory interface {
 	ProjectModule()
 	HouseModelModule()
 	PromotionModule()
+	LogoModule()
 }
 
 type moduleFactory struct {
@@ -215,5 +219,19 @@ func (m *moduleFactory) PromotionModule() {
 	router.Get("/:promotion_id", handler.FindOnePromotion)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddPromotion)
 	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), handler.UpdatePromotion)
-	// router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
+	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeletePromotion)
+}
+
+func (m *moduleFactory) LogoModule() {
+	repository := logosRepositories.LogosRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
+	usecase := logosUsecases.LogosUsecase(repository)
+	handler := logosHandlers.LogosHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+
+	router := m.r.Group("/logos")
+
+	router.Get("/", handler.FindLogo)
+	router.Get("/:logo_id", handler.FindOneLogo)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddLogo)
+	router.Patch("/update/:logo_id", m.mid.JwtAuth(), handler.UpdateLogo)
+	router.Delete("/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteLogo)
 }

@@ -76,10 +76,10 @@ func (r *activitiesRepository) FindOneActivity(activityId string) (*activities.A
 	}
 
 	if err := r.db.Get(&activityBytes, query, activityId); err != nil {
-		return nil, fmt.Errorf("get product failed: %v", err)
+		return nil, fmt.Errorf("get activity failed: %v", err)
 	}
 	if err := json.Unmarshal(activityBytes, &activity); err != nil {
-		return nil, fmt.Errorf("unmarshal product failed: %v", err)
+		return nil, fmt.Errorf("unmarshal activity failed: %v", err)
 	}
 	return activity, nil
 }
