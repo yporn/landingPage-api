@@ -1,7 +1,7 @@
 BEGIN;
 
 --set timezone
-SET TIME ZONE 'Asia/Bangkok';
+SET timezone TO 'UTC';
 
 --Install uuid extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -31,20 +31,29 @@ CREATE TYPE "type_project" AS ENUM('present', 'future');
 CREATE TYPE "status_career" AS ENUM('opening', 'closed');
 
 CREATE TABLE "users" (
-    "id" VARCHAR PRIMARY KEY DEFAULT NEXTVAL ('users_id_seq'), 
+    "id" SERIAL PRIMARY KEY, 
     "username" VARCHAR UNIQUE NOT NULL, 
     "password" VARCHAR, 
     "name" VARCHAR, 
     "tel" VARCHAR, 
     "email" VARCHAR UNIQUE, 
-    "role_id" INTEGER, 
+    "display" display NOT NULL, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE "user_images" (
+    "id" SERIAL PRIMARY KEY, 
+    "filename" VARCHAR, 
+    "url" VARCHAR, 
+    "user_id" INTEGER, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "oauth" (
     "id" uuid NOT NULL UNIQUE PRIMARY KEY DEFAULT uuid_generate_v4 (), 
-    "user_id" VARCHAR NOT NULL, 
+    "user_id" INTEGER NOT NULL, 
     "access_token" VARCHAR NOT NULL, 
     "refresh_token" VARCHAR NOT NULL, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
@@ -54,6 +63,12 @@ CREATE TABLE "oauth" (
 CREATE TABLE "roles" (
     "id" SERIAL PRIMARY KEY, 
     "title" VARCHAR NOT NULL UNIQUE
+);
+
+CREATE TABLE "user_roles" (
+    "id" SERIAL PRIMARY KEY, 
+    "user_id" INTEGER,
+    "role_id" INTEGER
 );
 
 CREATE TABLE "banners" (
@@ -320,9 +335,22 @@ CREATE TABLE "activities_images" (
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
-ALTER TABLE "users"
-ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id") ON DELETE CASCADE;
+CREATE TABLE "activity_logs" (
+    "id" SERIAL PRIMARY KEY,
+    "user_id" INTEGER,
+    "action" VARCHAR,
+    "details" VARCHAR,
+    "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+    "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+);
 
+ALTER TABLE "user_images"
+ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
+
+ALTER TABLE "user_roles"
+ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id") ON DELETE CASCADE;
+ALTER TABLE "user_roles"
+ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 ALTER TABLE "oauth"
 ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 
@@ -382,11 +410,14 @@ ADD FOREIGN KEY ("house_model_id") REFERENCES "house_models" ("id") ON DELETE CA
 
 ALTER TABLE "activities_images"
 ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id") ON DELETE CASCADE;
-
+ALTER TABLE "activity_logs"
+ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 CREATE TRIGGER set_updated_at_timestamp_users_table BEFORE
 UPDATE ON "users" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
-
+CREATE TRIGGER set_updated_at_timestamp_user_images_table BEFORE
+UPDATE ON "user_images" FOR EACH ROW
+EXECUTE PROCEDURE set_updated_at_column ();
 CREATE TRIGGER set_updated_at_timestamp_oauth_table BEFORE
 UPDATE ON "oauth" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
@@ -482,5 +513,7 @@ EXECUTE PROCEDURE set_updated_at_column ();
 CREATE TRIGGER set_updated_at_timestamp_activities_images_table BEFORE
 UPDATE ON "activities_images" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
-
+CREATE TRIGGER set_updated_at_timestamp_activity_logs_table BEFORE
+UPDATE ON "activity_logs" FOR EACH ROW
+EXECUTE PROCEDURE set_updated_at_column ();
 COMMIT;

@@ -3,6 +3,7 @@ package usersRepositories
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -12,7 +13,7 @@ import (
 )
 
 type IUsersRepository interface {
-	InsertUser(req *users.UserRegisterReq) (*users.UserPassport, error)
+	InsertUser(req *users.User) (*users.UserPassport, error)
 	FindOneUserByEmail(email string) (*users.UserCredentialCheck, error)
 	InsertOauth(req *users.UserPassport) error
 	FindOneOauth(refreshToken string) (*users.Oauth, error)
@@ -31,21 +32,27 @@ func UsersRepository(db *sqlx.DB) IUsersRepository {
 	}
 }
 
-func (r *usersRepository) InsertUser(req *users.UserRegisterReq) (*users.UserPassport, error) {
-	result := usersPatterns.InsertUser(r.db, req)
-	var err error
-	result, err = result.Admin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Get result from inserting
-	user, err := result.Result()
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+func (r *usersRepository) InsertUser(req *users.User) (*users.UserPassport, error) {
+    builder := usersPatterns.InsertUserBuilder(r.db, req)
+    
+    // Insert the user into the database
+    if _, err := usersPatterns.InsertUserEngineer(builder).InsertUser(); err != nil {
+        return nil, fmt.Errorf("insert user failed: %v", err)
+    }
+    
+    // Retrieve the inserted user data
+    user, err := builder.Result()
+    if err != nil {
+        if strings.Contains(err.Error(), "sql: no rows in result set") {
+            return nil, fmt.Errorf("inserted user not found: %v", err)
+        }
+       
+        return nil, fmt.Errorf("get user failed: %v", err)
+    }
+    
+    return user, nil
 }
+
 
 func (r *usersRepository) FindOneUserByEmail(email string) (*users.UserCredentialCheck, error) {
 	query := `
@@ -53,8 +60,7 @@ func (r *usersRepository) FindOneUserByEmail(email string) (*users.UserCredentia
 		"id",
 		"email",
 		"password",
-		"username",
-		"role_id"
+		"username"
 	FROM "users"
 	WHERE "email" = $1;`
 
@@ -124,8 +130,9 @@ func (r *usersRepository) GetProfile(userId string) (*users.User, error) {
 	SELECT
 		"id",
 		"email",
-		"username",
-		"role_id"
+		"username"
+		
+		
 	FROM "users"
 	WHERE "id" = $1;`
 

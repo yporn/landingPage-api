@@ -4,21 +4,36 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/yporn/sirarom-backend/modules/entities"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	Status string
-	Id       string `db:"id" json:"id"`
-	Email    string `db:"email" json:"email"`
-	Username string `db:"username" json:"username"`
-	RoleId   int    `db:"role_id" json:"role_id"`
+	Id       int               `db:"id" json:"id"`
+	Email    string            `db:"email" json:"email"`
+	Username string            `db:"username" json:"username"`
+	Password string            `db:"password" json:"password"`
+	Name     string            `db:"name" json:"name"`
+	Tel      string            `db:"tel" json:"tel"`
+	Display  string            `db:"display" json:"display"`
+	Images   []*entities.Image `json:"images"`
+	UserRole []*UserRole       `json:"roles"`
 }
 
 type UserRegisterReq struct {
-	Email    string `db:"email" json:"email" form:"email"`
-	Password string `db:"password" json:"password" form:"password"`
-	Username string `db:"username" json:"username" form:"username"`
+	Email    string            `db:"email" json:"email" form:"email"`
+	Password string            `db:"password" json:"password" form:"password"`
+	Username string            `db:"username" json:"username" form:"username"`
+	Name     string            `db:"name" json:"name"`
+	Tel      string            `db:"tel" json:"tel"`
+	Display  string            `db:"display" json:"display"`
+	Images   []*entities.Image `json:"images"`
+	UserRole []*UserRole       `json:"roles"`
+}
+
+type UserRole struct {
+	UserId int `db:"user_id" json:"user_id"`
+	RoleId int `db:"role_id" json:"role_id"`
 }
 
 type UserCredential struct {
@@ -27,11 +42,11 @@ type UserCredential struct {
 }
 
 type UserCredentialCheck struct {
-	Id       string `db:"id"`
-	Email    string `db:"email"`
-	Password string `db:"password"`
-	Username string `db:"username"`
-	RoleId   int    `db:"role_id"`
+	Id       string      `db:"id"`
+	Email    string      `db:"email"`
+	Password string      `db:"password"`
+	Username string      `db:"username"`
+	UserRole []*UserRole `json:"roles"`
 }
 
 type UserPassport struct {
@@ -46,8 +61,8 @@ type UserToken struct {
 }
 
 type UserClaims struct {
-	Id     string `db:"id" json:"id"`
-	RoleId int    `db:"role" json:"role"`
+	Id       string      `db:"id" json:"id"`
+	UserRole []*UserRole `json:"roles"`
 }
 
 type UserRefreshCredential struct {
@@ -63,7 +78,7 @@ type UserRemoveCredential struct {
 	OauthId string `db:"id" json:"oauth_id" form:"oauth_id"`
 }
 
-func (obj *UserRegisterReq) BcryptHashing() error {
+func (obj *User) BcryptHashing() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(obj.Password), 10)
 	if err != nil {
 		return fmt.Errorf("hashed password failed: %v", err)
@@ -72,7 +87,7 @@ func (obj *UserRegisterReq) BcryptHashing() error {
 	return nil
 }
 
-func (obj *UserRegisterReq) IsEmail() bool {
+func (obj *User) IsEmail() bool {
 	match, err := regexp.MatchString(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`, obj.Email)
 	if err != nil {
 		return false

@@ -1,6 +1,7 @@
 package middlewaresUsecases
 
 import (
+
 	"github.com/yporn/sirarom-backend/modules/middlewares"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresRepositories"
 )
@@ -8,6 +9,7 @@ import (
 type IMiddlewaresUsecase interface {
 	FindAccessToken(userId, accessToken string) bool
 	FindRole() ([]*middlewares.Role, error)
+	GetUserRoles(userID int) ([]*middlewares.Role, error)
 }
 
 type middlewaresUsecase struct {
@@ -31,4 +33,13 @@ func (u *middlewaresUsecase) FindRole() ([]*middlewares.Role, error) {
 	}
 
 	return roles, nil
+}
+
+func (u *middlewaresUsecase) GetUserRoles(userID int) ([]*middlewares.Role, error) {
+	roles, err := u.middlewaresRepository.GetUserRoles(userID)
+    if err != nil {
+        return nil, err
+    }
+
+    return roles, nil
 }

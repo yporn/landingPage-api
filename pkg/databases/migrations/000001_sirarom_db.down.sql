@@ -25,14 +25,17 @@ DROP TRIGGER IF EXISTS set_updated_at_timestamp_promotions_free_items_table ON "
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_promotions_house_models_table ON "promotion_house_models";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_activities_table ON "activities";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_activities_images_table ON "activities_images";
+DROP TRIGGER IF EXISTS set_updated_at_timestamp_activity_logs_table ON "activity_logs";
 DROP FUNCTION IF EXISTS set_updated_at_column();
 
 DROP TABLE IF EXISTS "users" CASCADE;
 DROP TABLE IF EXISTS "oauth" CASCADE;
 DROP TABLE IF EXISTS "roles" CASCADE;
+DROP TABLE IF EXISTS "user_roles" CASCADE;
 DROP TABLE IF EXISTS "banners" CASCADE;
 DROP TABLE IF EXISTS "banner_images" CASCADE;
-DROP TABLE IF EXISTS "brands" CASCADE;
+DROP TABLE IF EXISTS "logos" CASCADE;
+DROP TABLE IF EXISTS "logo_images" CASCADE;
 DROP TABLE IF EXISTS "data_settings" CASCADE;
 DROP TABLE IF EXISTS "projects" CASCADE;
 DROP TABLE IF EXISTS "project_images" CASCADE;

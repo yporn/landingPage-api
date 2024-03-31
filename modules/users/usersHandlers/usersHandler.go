@@ -41,7 +41,10 @@ func UsersHandler(cfg config.IConfig, usersUsecase usersUsecases.IUsersUsecase) 
 
 func (h *usersHandler) SignUp(c *fiber.Ctx) error {
 	// Request body parser
-	req := new(users.UserRegisterReq)
+	req := &users.User{
+		Images:   make([]*entities.Image, 0),
+		UserRole: make([]*users.UserRole, 0),
+	}
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,

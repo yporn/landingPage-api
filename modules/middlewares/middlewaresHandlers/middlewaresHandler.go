@@ -1,6 +1,9 @@
 package middlewaresHandlers
 
 import (
+	"fmt"
+	"strconv"
+
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,7 +13,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresUsecases"
 	"github.com/yporn/sirarom-backend/pkg/auth"
-	"github.com/yporn/sirarom-backend/pkg/utils"
+	// "github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type middlewareHandlersErrCode string
@@ -19,7 +22,7 @@ const (
 	routerCheckErr middlewareHandlersErrCode = "middleware-001"
 	jwtAuthErr     middlewareHandlersErrCode = "middleware-002"
 	authorizeErr   middlewareHandlersErrCode = "middleware-003"
-	apiKeyErr   middlewareHandlersErrCode = "middleware-004"
+	apiKeyErr      middlewareHandlersErrCode = "middleware-004"
 )
 
 type IMiddlewaresHandler interface {
@@ -27,7 +30,7 @@ type IMiddlewaresHandler interface {
 	RouterCheck() fiber.Handler
 	Logger() fiber.Handler
 	JwtAuth() fiber.Handler
-	Authorize(expectRoleId ...int) fiber.Handler
+	Authorize(expectRoleIDs ...int) fiber.Handler
 	ApiKeyAuth() fiber.Handler
 }
 
@@ -69,13 +72,15 @@ func (h *middlewaresHandler) Logger() fiber.Handler {
 	return logger.New(logger.Config{
 		Format:     "${time} [${ip}] ${status} - ${method} ${path}\n",
 		TimeFormat: "02/01/2006",
-		TimeZone:   "Bangkok/Asia",
+		TimeZone:   "UTC",
 	})
 }
 
 func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := strings.TrimPrefix(c.Get("Authorization"), "Bearer ")
+		fmt.Println("Token:", token) // ปริ้นค่า Token ก่อนที่จะทำการ Parse
+
 		result, err := auth.ParseToken(h.cfg.Jwt(), token)
 		if err != nil {
 			return entities.NewResponse(c).Error(
@@ -86,6 +91,8 @@ func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 		}
 
 		claims := result.Claims
+		fmt.Println("Claims:", claims) // ปริ้นค่า claims หลังจาก Parse Token
+
 		if !h.middlewaresUsecase.FindAccessToken(claims.Id, token) {
 			return entities.NewResponse(c).Error(
 				fiber.ErrUnauthorized.Code,
@@ -96,47 +103,46 @@ func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 
 		// Set UserId
 		c.Locals("userId", claims.Id)
-		c.Locals("userRoleId", claims.RoleId)
+		c.Locals("userRoleId", claims.UserRole)
 		return c.Next()
 	}
 }
 
-func (h *middlewaresHandler) Authorize(expectRoleId ...int) fiber.Handler {
+func (h *middlewaresHandler) Authorize(expectRoleIDs ...int) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		userRoleId, ok := c.Locals("userRoleId").(int)
+
+		userIdstr, ok := c.Locals("userId").(string)
 		if !ok {
 			return entities.NewResponse(c).Error(
-				fiber.ErrUnauthorized.Code,
+				fiber.ErrInternalServerError.Code,
 				string(authorizeErr),
-				"user_id is not int type",
+				fmt.Sprintf("userID not found in context or not an int: %v", userIdstr),
 			).Res()
 		}
 
-		roles, err := h.middlewaresUsecase.FindRole()
+		userID, err := strconv.Atoi(userIdstr)
+		if err != nil {
+			return err
+		}
+		
+		userRoles, err := h.middlewaresUsecase.GetUserRoles(userID)
 		if err != nil {
 			return entities.NewResponse(c).Error(
 				fiber.ErrInternalServerError.Code,
 				string(authorizeErr),
-				err.Error(),
+				fmt.Sprintf("failed to retrieve user roles: %v", err),
 			).Res()
 		}
 
-		sum := 0
-		for _, v := range expectRoleId {
-			sum += v
-		}
+		for _, userRole := range userRoles {
+			for _, expectRoleID := range expectRoleIDs {
+				if userRole.Id == expectRoleID {
 
-		expectedValueBinary := utils.BinaryConverter(sum, len(roles))
-		userValueBinary := utils.BinaryConverter(userRoleId, len(roles))
-
-		// user ->     0 1 0
-		// expected -> 1 1 0
-
-		for i := range userValueBinary {
-			if userValueBinary[i]&expectedValueBinary[i] == 1 {
-				return c.Next()
+					return c.Next()
+				}
 			}
 		}
+
 		return entities.NewResponse(c).Error(
 			fiber.ErrUnauthorized.Code,
 			string(authorizeErr),

@@ -1,25 +1,29 @@
 BEGIN;
 
-INSERT INTO "roles" ("title") VALUES ('dev'), ('admin');
+INSERT INTO "roles" ("title") VALUES ('all'), ('home'), ('project'), ('promotion'), ('activity'), ('job');
 
 INSERT INTO
     "users" (
-        "username", "name", "email", "password", "role_id"
+        "username", "name", "email", "password", "tel", "display"
     )
 VALUES (
         'y.pornwisa', 
         'pornwisa', 
         'y.pornwisa@gmail.com', 
         '$2a$10$8KzaNdKIMyOkASCH4QvSKuEMIY7Jc3vcHDuSJvXLii1rvBNgz60a6', 
-        2
+        '0900000000',
+        'published'
     ),
     (
         'admin', 
         'admin', 
         'admin001@kawaii.com', 
         '$2a$10$3qqNPE.TJpNGYCohjTgw9.v1z0ckovx95AmiEtUXcixGAgfW7.wCi', 
-        2
+        '0900000000',
+        'published'
     );
+
+INSERT INTO "user_roles" ("user_id", "role_id") VALUES (2, 2), (2, 3), (2, 4), (1, 1);
 
 INSERT INTO banners ("index", "delay", "display")
 VALUES (1, 5, 'published'),

@@ -166,9 +166,10 @@ func (m *moduleFactory) BannerModule() {
 }
 
 func (m *moduleFactory) ActivityModule() {
+	db := m.s.db.DB
 	repository := activitiesRepositories.ActivitiesRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := activitiesUsecases.ActivitiesUsecase(repository)
-	handler := activitiesHandlers.ActivitiesHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := activitiesHandlers.ActivitiesHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/activities")
 
@@ -219,7 +220,7 @@ func (m *moduleFactory) PromotionModule() {
 	router.Get("/:promotion_id", handler.FindOnePromotion)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddPromotion)
 	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), handler.UpdatePromotion)
-	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeletePromotion)
+	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(4), handler.DeletePromotion)
 }
 
 func (m *moduleFactory) LogoModule() {
