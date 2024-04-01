@@ -52,6 +52,9 @@ func UpdateHouseModelBuilder(db *sqlx.DB, req *houseModels.HouseModel, filesUsec
 		values:        make([]any, 0),
 	}
 }
+type updateHouseModelEngineer struct {
+	builder IUpdateHouseModelBuilder
+}
 
 func (b *updateHouseModelBuilder) initTransaction() error {
 	tx, err := b.db.BeginTxx(context.Background(), nil)
@@ -75,6 +78,7 @@ func (b *updateHouseModelBuilder) updateQuery() {
 		b.lastStackIndex = len(b.values)
 		setStatements = append(setStatements, fmt.Sprintf(`"name" = $%d`, b.lastStackIndex))
 	}
+
 	if b.req.Description != "" {
 		b.values = append(b.values, b.req.Description)
 		b.lastStackIndex = len(b.values)
@@ -525,16 +529,11 @@ func (b *updateHouseModelBuilder) getValues() []any         { return b.values }
 func (b *updateHouseModelBuilder) getQuery() string         { return b.query }
 func (b *updateHouseModelBuilder) setQuery(query string)    { b.query = query }
 func (b *updateHouseModelBuilder) getImagesLen() int        { return len(b.req.Images) }
-
 func (b *updateHouseModelBuilder) commit() error {
 	if err := b.tx.Commit(); err != nil {
 		return err
 	}
 	return nil
-}
-
-type updateHouseModelEngineer struct {
-	builder IUpdateHouseModelBuilder
 }
 
 func UpdateHouseModelEngineer(b IUpdateHouseModelBuilder) *updateHouseModelEngineer {
@@ -564,6 +563,11 @@ func (en *updateHouseModelEngineer) UpdateHouseModel() error {
 	en.builder.closeQuery()
 
 	fmt.Println(en.builder.getQuery())
+
+
+	if err := en.builder.updateHouseModel(); err != nil {
+		return err
+	}
 
 	if en.builder.getImagesLen() > 0 {
 		if err := en.builder.updateImagesHouseModel(); err != nil {
