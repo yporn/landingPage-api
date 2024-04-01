@@ -9,7 +9,7 @@ DROP TRIGGER IF EXISTS set_updated_at_timestamp_projects_table ON "projects";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_project_images_table ON "project_images";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_projects_house_type_items_table ON "projects_house_type_items";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_project_desc_area_items_table ON "project_desc_area_items";
-DROP TRIGGER IF EXISTS set_updated_at_timestamp_project_comfortable_items_table ON "project_comfortable_items";
+DROP TRIGGER IF EXISTS set_updated_at_timestamp_project_facility_items_table ON "project_facility_items";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_models_table ON "house_models";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_images_table ON "house_model_images";
 DROP TRIGGER IF EXISTS set_updated_at_timestamp_house_model_type_items_table ON "house_model_type_items";
@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS "projects" CASCADE;
 DROP TABLE IF EXISTS "project_images" CASCADE;
 DROP TABLE IF EXISTS "project_house_type_items" CASCADE;
 DROP TABLE IF EXISTS "project_desc_area_items" CASCADE;
-DROP TABLE IF EXISTS "project_comfortable_items" CASCADE;
+DROP TABLE IF EXISTS "project_facility_items" CASCADE;
 DROP TABLE IF EXISTS "house_models" CASCADE;
 DROP TABLE IF EXISTS "house_model_images" CASCADE;
 DROP TABLE IF EXISTS "house_model_type_items" CASCADE;
@@ -56,6 +56,7 @@ DROP TABLE IF EXISTS "promotion_free_items" CASCADE;
 DROP TABLE IF EXISTS "promotion_house_models" CASCADE;
 DROP TABLE IF EXISTS "activities" CASCADE;
 DROP TABLE IF EXISTS "activities_images" CASCADE;
+DROP TABLE IF EXISTS "activity_logs" CASCADE;
 
 
 DROP TYPE IF EXISTS "display";

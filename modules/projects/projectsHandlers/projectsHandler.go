@@ -76,7 +76,6 @@ func (h *projectsHandler) FindProjectHouseModel(c *fiber.Ctx) error {
 	return entities.NewResponse(c).Success(fiber.StatusOK, project).Res()
 }
 
-
 func (h *projectsHandler) FindProject(c *fiber.Ctx) error {
 	req := &projects.ProjectFilter{
 		SortReq:       &entities.SortReq{},
@@ -124,10 +123,10 @@ func (h *projectsHandler) FindProject(c *fiber.Ctx) error {
 
 func (h *projectsHandler) AddProject(c *fiber.Ctx) error {
 	req := &projects.Project{
-		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
-		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
-		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
-		Images:          make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
+		Images:        make([]*entities.Image, 0),
 	}
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
@@ -154,7 +153,7 @@ func (h *projectsHandler) AddProject(c *fiber.Ctx) error {
 	}
 
 	// facilities
-	if len(req.ComfortableItem) == 0 {
+	if len(req.FacilityItem) == 0 {
 		return entities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,
 			string(insertProjectErr),
@@ -185,10 +184,10 @@ func (h *projectsHandler) UpdateProject(c *fiber.Ctx) error {
 	}
 
 	req := &projects.Project{
-		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
-		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
-		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
-		Images:          make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
+		Images:        make([]*entities.Image, 0),
 	}
 
 	if err := c.BodyParser(req); err != nil {

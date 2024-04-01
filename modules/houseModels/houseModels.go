@@ -21,13 +21,13 @@ type HouseModel struct {
 type HouseModelTypeItem struct {
 	Id       int    `db:"id" json:"id"`
 	RoomType string `db:"room_type" json:"room_type"`
-	Amount   string `db:"amount" json:"amount"`
+	Amount   int `db:"amount" json:"amount"`
 }
 
 type HouseModelPlan struct {
 	Id           int                   `db:"id" json:"id"`
 	HouseModelId int                   `db:"house_model_id" json:"house_model_id"`
-	Floor        string                `db:"floor" json:"floor"`
+	Floor        int                `db:"floor" json:"floor"`
 	Size         string                `db:"size" json:"size"`
 	Images       []*entities.Image     `json:"plan_images"`
 	PlanItem     []*HouseModelPlanItem `json:"plan_items"`
@@ -37,7 +37,7 @@ type HouseModelPlanItem struct {
 	Id          int    `db:"id" json:"id"`
 	HousePlanId int    `db:"house_model_plan_id" json:"house_model_plan_id"`
 	RoomType    string `db:"room_type" json:"room_type"`
-	Amount      string `db:"amount" json:"amount"`
+	Amount      int `db:"amount" json:"amount"`
 }
 
 type HouseModelFilter struct {

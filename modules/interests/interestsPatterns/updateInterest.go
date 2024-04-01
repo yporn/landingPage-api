@@ -77,7 +77,7 @@ func (b *updateInterestBuilder) updateQuery() {
 		setStatements = append(setStatements, fmt.Sprintf(`"bank_name" = $%d`, b.lastStackIndex))
 	}
 
-	if b.req.InterestRate != "" {
+	if b.req.InterestRate != 0 {
 		b.values = append(b.values, b.req.InterestRate)
 		b.lastStackIndex = len(b.values)
 
@@ -243,7 +243,6 @@ func (en *updateInterestEngineer) UpdateInterest() error {
 
 	fmt.Println(en.builder.getQuery())
 
-	
 	if err := en.builder.updateInterest(); err != nil {
 		return err
 	}

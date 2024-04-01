@@ -15,7 +15,7 @@ type IInsertProjectBuilder interface {
 	insertProject() error
 	insertHouseTypeItem() error
 	insertDescAreaItem() error
-	insertComfortableItem() error
+	insertFacilityItem() error
 	insertAttachment() error
 	commit() error
 	getProjectId() string
@@ -155,23 +155,23 @@ func (b *insertProjectBuilder) insertDescAreaItem() error {
 	return nil
 }
 
-func (b *insertProjectBuilder) insertComfortableItem() error {
+func (b *insertProjectBuilder) insertFacilityItem() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	query := `
-	INSERT INTO "project_comfortable_items" (
+	INSERT INTO "project_facility_items" (
 		"project_id",
 		"item"
 	)
 	VALUES ($1, $2);
 	`
-	for _, comfortableItem := range b.req.ComfortableItem {
+	for _, facility := range b.req.FacilityItem {
 		if _, err := b.tx.ExecContext(
 			ctx,
 			query,
 			b.req.Id,
-			comfortableItem.Item,
+			facility.Item,
 		); err != nil {
 			b.tx.Rollback()
 			return fmt.Errorf("insert project Facilities items failed: %v", err)
@@ -250,7 +250,7 @@ func (en *insertProjectEngineer) InsertProject() (string, error) {
 	if err := en.builder.insertDescAreaItem(); err != nil {
 		return "", err
 	}
-	if err := en.builder.insertComfortableItem(); err != nil {
+	if err := en.builder.insertFacilityItem(); err != nil {
 		return "", err
 	}
 	if err := en.builder.insertAttachment(); err != nil {

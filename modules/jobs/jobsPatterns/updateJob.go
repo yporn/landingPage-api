@@ -68,7 +68,7 @@ func (b *updateJobBuilder) updateQuery() {
 		setStatements = append(setStatements, fmt.Sprintf(`"position" = $%d`, b.lastStackIndex))
 	}
 
-	if b.req.Amount != "" {
+	if b.req.Amount != 0 {
 		b.values = append(b.values, b.req.Amount)
 		b.lastStackIndex = len(b.values)
 

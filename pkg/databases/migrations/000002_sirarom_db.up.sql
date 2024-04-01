@@ -72,7 +72,7 @@ VALUES (1, 'Area A', '100', 'sqm'),
        (2, 'Area C', '150', 'sqm');
 
 -- Seed data for the "project_comfortable_items" table
-INSERT INTO project_comfortable_items (project_id, item)
+INSERT INTO project_facility_items (project_id, item)
 VALUES (1, 'Comfortable A'),
        (1, 'Comfortable B'),
        (2, 'Comfortable C');

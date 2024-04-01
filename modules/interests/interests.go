@@ -5,7 +5,7 @@ import "github.com/yporn/sirarom-backend/modules/entities"
 type Interest struct {
 	Id           int    `db:"id" json:"id"`
 	BankName     string `db:"bank_name" json:"bank_name"`
-	InterestRate string `db:"interest_rate" json:"interest_rate"`
+	InterestRate float32 `db:"interest_rate" json:"interest_rate"`
 	Note         string `db:"note" json:"note"`
 	Display      string `db:"display" json:"display"`
 	CreatedAt    string `db:"created_at" json:"created_at"`

@@ -23,9 +23,9 @@ type IUpdateProjectBuilder interface {
 	insertDescAreaItem() error
 	getOldDescAreaItem() []*projects.ProjectDescAreaItem
 	deleteOldDescAreaItem() error
-	insertComfortableItem() error
-	getOldComfortableItem() []*projects.ProjectComfortableItem
-	deleteOldComfortableItem() error
+	insertFacilityItem() error
+	getOldFacilityItem() []*projects.ProjectFacilityItem
+	deleteOldFacilityItem() error
 	insertImages() error
 	getOldImages() []*entities.Image
 	deleteOldImages() error
@@ -38,7 +38,7 @@ type IUpdateProjectBuilder interface {
 	getImagesLen() int
 	getHouseTypeItemLen() int
 	getDescAreaItemLen() int
-	getComfortableItemLen() int
+	getFacilityItemLen() int
 	commit() error
 }
 
@@ -321,24 +321,24 @@ func (b *updateProjectBuilder) deleteOldDescAreaItem() error {
 	return nil
 }
 
-func (b *updateProjectBuilder) insertComfortableItem() error {
+func (b *updateProjectBuilder) insertFacilityItem() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	query := `
-	INSERT INTO "project_comfortable_items" (
+	INSERT INTO "project_facility_items" (
 		"project_id",
 		"item"
 	)
 	VALUES ($1, $2);
 	`
 
-	for _, comfortableItem := range b.req.ComfortableItem {
+	for _, facilityItem := range b.req.FacilityItem {
 		if _, err := b.tx.ExecContext(
 			ctx,
 			query,
 			b.req.Id,
-			comfortableItem.Item,
+			facilityItem.Item,
 			
 		); err != nil {
 			b.tx.Rollback()
@@ -349,28 +349,28 @@ func (b *updateProjectBuilder) insertComfortableItem() error {
 	return nil
 }
 
-func (b *updateProjectBuilder) getOldComfortableItem() []*projects.ProjectComfortableItem {
+func (b *updateProjectBuilder) getOldFacilityItem() []*projects.ProjectFacilityItem {
 	query := `
 	SELECT
 		"id",
 		"item"
-	FROM "project_comfortable_items"
+	FROM "project_facility_items"
 	WHERE "project_id" = $1;
 	`
-	comfortableItem := make([]*projects.ProjectComfortableItem, 0)
+	facilityItem := make([]*projects.ProjectFacilityItem, 0)
 	if err := b.db.Select(
-		&comfortableItem,
+		&facilityItem,
 		query,
 		b.req.Id,
 	); err != nil {
-		return make([]*projects.ProjectComfortableItem, 0)
+		return make([]*projects.ProjectFacilityItem, 0)
 	}
-	return comfortableItem
+	return facilityItem
 }
 
-func (b *updateProjectBuilder) deleteOldComfortableItem() error {
+func (b *updateProjectBuilder) deleteOldFacilityItem() error {
 	query := `
-	DELETE FROM "project_comfortable_items"
+	DELETE FROM "project_facility_items"
 	WHERE "project_id" = $1;
 	`
 	if _, err := b.tx.ExecContext(
@@ -493,7 +493,7 @@ func (b *updateProjectBuilder) setQuery(query string)    { b.query = query }
 func (b *updateProjectBuilder) getImagesLen() int        { return len(b.req.Images) }
 func (b *updateProjectBuilder) getHouseTypeItemLen() int { return len(b.req.HouseTypeItem) }
 func (b *updateProjectBuilder) getDescAreaItemLen() int { return len(b.req.DescAreaItem) }
-func (b *updateProjectBuilder) getComfortableItemLen() int { return len(b.req.ComfortableItem) }
+func (b *updateProjectBuilder) getFacilityItemLen() int { return len(b.req.FacilityItem) }
 func (b *updateProjectBuilder) commit() error {
 	if err := b.tx.Commit(); err != nil {
 		return err
@@ -551,11 +551,11 @@ func (en *updateProjectEngineer) UpdateProject() error {
 		}
 	}
 
-	if en.builder.getComfortableItemLen() > 0 {
-		if err := en.builder.deleteOldComfortableItem(); err != nil {
+	if en.builder.getFacilityItemLen() > 0 {
+		if err := en.builder.deleteOldFacilityItem(); err != nil {
 			return err
 		}
-		if err := en.builder.insertComfortableItem(); err != nil {
+		if err := en.builder.insertFacilityItem(); err != nil {
 			return err
 		}
 	}

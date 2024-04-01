@@ -72,7 +72,7 @@ func (r *projectsRepository) FindOneProject(projectId string) (*projects.Project
 				FROM (
 					SELECT
 						"ci".*
-					FROM "project_comfortable_items" "ci"
+					FROM "project_facility_items" "ci"
 					WHERE "ci"."project_id" = "p"."id"
 					
 				) AS "cit"
@@ -125,10 +125,10 @@ func (r *projectsRepository) FindOneProject(projectId string) (*projects.Project
 	`
 	projectBytes := make([]byte, 0)
 	project := &projects.Project{
-		Images:          make([]*entities.Image, 0),
-		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
-		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
-		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
+		Images:        make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
 	}
 
 	if err := r.db.Get(&projectBytes, query, projectId); err != nil {
@@ -184,10 +184,10 @@ func (r *projectsRepository) FindProjectHouseModel(projectId string) (*projects.
 	`
 	projectBytes := make([]byte, 0)
 	project := &projects.Project{
-		Images:          make([]*entities.Image, 0),
-		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
-		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
-		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
+		Images:        make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
 	}
 
 	if err := r.db.Get(&projectBytes, query, projectId); err != nil {

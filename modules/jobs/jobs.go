@@ -3,9 +3,9 @@ package jobs
 import "github.com/yporn/sirarom-backend/modules/entities"
 
 type Job struct {
-	Id            int `db:"id" json:"id"`
+	Id            int    `db:"id" json:"id"`
 	Position      string `db:"position" json:"position"`
-	Amount        string `db:"amount" json:"amount"`
+	Amount        int    `db:"amount" json:"amount"`
 	Location      string `db:"location" json:"location"`
 	Description   string `db:"description" json:"description"`
 	Qualification string `db:"qualification" json:"qualification"`
@@ -18,7 +18,7 @@ type Job struct {
 }
 
 type JobFilter struct {
-	Id string `query:"id"`
+	Id     string `query:"id"`
 	Search string `query:"search"`
 	*entities.PaginationReq
 	*entities.SortReq

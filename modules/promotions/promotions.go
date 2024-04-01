@@ -39,7 +39,7 @@ type HouseModel struct {
 type HouseModelType struct {
 	Id       int    `json:"id"`
 	RoomType string `json:"room_type"`
-	Amount   string `json:"amount"`
+	Amount   int `json:"amount"`
 }
 
 type PromotionFilter struct {

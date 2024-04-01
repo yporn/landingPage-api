@@ -135,7 +135,7 @@ CREATE TABLE "projects" (
     "heading" VARCHAR, 
     "text" VARCHAR, 
     "location" TEXT, 
-    "price" INTEGER, 
+    "price" FLOAT, 
     "status_project" status_project NOT NULL, 
     "type_project" type_project NOT NULL, 
     "description" TEXT, 
@@ -170,13 +170,13 @@ CREATE TABLE "project_desc_area_items" (
     "id" SERIAL PRIMARY KEY, 
     "project_id" INTEGER, 
     "item" VARCHAR, 
-    "amount" VARCHAR, 
+    "amount" INTEGER, 
     "unit" VARCHAR, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
-CREATE TABLE "project_comfortable_items" (
+CREATE TABLE "project_facility_items" (
     "id" SERIAL PRIMARY KEY, 
     "project_id" INTEGER, 
     "item" VARCHAR, 
@@ -210,7 +210,7 @@ CREATE TABLE "house_model_type_items" (
     "id" SERIAL PRIMARY KEY, 
     "house_model_id" INTEGER, 
     "room_type" VARCHAR, 
-    "amount" VARCHAR, 
+    "amount" INTEGER, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
@@ -218,7 +218,7 @@ CREATE TABLE "house_model_type_items" (
 CREATE TABLE "house_model_plans" (
     "id" SERIAL PRIMARY KEY, 
     "house_model_id" INTEGER, 
-    "floor" VARCHAR, 
+    "floor" INTEGER, 
     "size" VARCHAR, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
@@ -228,7 +228,7 @@ CREATE TABLE "house_model_plan_items" (
     "id" SERIAL PRIMARY KEY, 
     "house_model_plan_id" INTEGER, 
     "room_type" VARCHAR, 
-    "amount" VARCHAR,
+    "amount" INTEGER,
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
@@ -245,7 +245,7 @@ CREATE TABLE "house_model_plan_images" (
 CREATE TABLE "interests" (
     "id" SERIAL PRIMARY KEY, 
     "bank_name" VARCHAR, 
-    "interest_rate" VARCHAR, 
+    "interest_rate" FLOAT, 
     "note" VARCHAR, 
     "display" display NOT NULL, 
     "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
@@ -264,7 +264,7 @@ CREATE TABLE "interest_images" (
 CREATE TABLE "careers" (
     "id" SERIAL PRIMARY KEY, 
     "position" VARCHAR, 
-    "amount" VARCHAR, 
+    "amount" INTEGER, 
     "location" VARCHAR, 
     "description" TEXT, 
     "qualification" TEXT, 
@@ -372,7 +372,7 @@ ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 ALTER TABLE "project_desc_area_items"
 ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "project_comfortable_items"
+ALTER TABLE "project_facility_items"
 ADD FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "house_models"
@@ -450,8 +450,8 @@ CREATE TRIGGER set_updated_at_timestamp_project_desc_area_items_table BEFORE
 UPDATE ON "project_desc_area_items" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
 
-CREATE TRIGGER set_updated_at_timestamp_project_comfortable_items_table BEFORE
-UPDATE ON "project_comfortable_items" FOR EACH ROW
+CREATE TRIGGER set_updated_at_timestamp_project_facility_items_table BEFORE
+UPDATE ON "project_facility_items" FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_column ();
 
 CREATE TRIGGER set_updated_at_timestamp_house_models_table BEFORE
