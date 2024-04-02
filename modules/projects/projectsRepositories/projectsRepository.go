@@ -173,7 +173,29 @@ func (r *projectsRepository) FindProjectHouseModel(projectId string) (*projects.
 								FROM "house_model_images" "ihm"
 								WHERE "ihm"."house_model_id" = "hm"."id"
 							) AS "ihm"
-						) AS "house_images"
+						) AS "house_images",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ptm")), '[]'::json)
+							FROM (
+								SELECT
+									"ptm"."id",
+									"ptm"."house_model_id",
+									"ptm"."promotion_id",
+									(
+										SELECT
+											COALESCE(array_to_json(array_agg("pt")), '[]'::json)
+										FROM (
+											SELECT
+												"pt".*
+											FROM "promotions" "pt"
+											WHERE  "ptm"."promotion_id" = "pt"."id"
+										) AS "pt"
+									) AS "promotions"
+								FROM "promotion_house_models" "ptm"
+								WHERE "ptm"."house_model_id" = "hm"."id"
+							) AS "ptm"
+						) AS "houseModel_promotions"
 					FROM "house_models" "hm"
 					WHERE "hm"."project_id" = "p"."id"
 				) AS "hm"

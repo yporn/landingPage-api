@@ -344,6 +344,16 @@ CREATE TABLE "activity_logs" (
     "updated_at" TIMESTAMP NOT NULL DEFAULT now()
 );
 
+
+CREATE TABLE "seo" (
+    "id" SERIAL PRIMARY KEY,
+    "title" VARCHAR,
+    "description" TEXT,
+    "keywords" VARCHAR,
+    "robot" VARCHAR,
+    "google_bot" VARCHAR,
+);
+
 ALTER TABLE "user_images"
 ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 

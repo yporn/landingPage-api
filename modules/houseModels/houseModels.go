@@ -1,6 +1,9 @@
 package houseModels
 
-import "github.com/yporn/sirarom-backend/modules/entities"
+import (
+	"github.com/yporn/sirarom-backend/modules/entities"
+	"github.com/yporn/sirarom-backend/modules/promotions"
+)
 
 type HouseModel struct {
 	Id              int                   `db:"id" json:"id"`
@@ -16,6 +19,12 @@ type HouseModel struct {
 	Images          []*entities.Image     `json:"house_images"`
 	TypeItem        []*HouseModelTypeItem `json:"type_items"`
 	HousePlan       []*HouseModelPlan     `json:"house_plan"`
+	Promotion		[]*HouseModelPromotion `json:"houseModel_promotions"`
+}
+
+type HouseModelPromotion struct {
+	Id       int    `db:"id" json:"id"`
+	Promotion []*promotions.Promotion `json:"promotions"`
 }
 
 type HouseModelTypeItem struct {

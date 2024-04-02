@@ -120,7 +120,27 @@ func (b *findHouseModelBuilder) initQuery() {
 					FROM "house_model_plans" "hmp"
 					WHERE "hmp"."house_model_id" = "hm"."id"
 				) AS "hmp"
-			) AS "house_plan"
+			) AS "house_plan",
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("ptm")), '[]'::json)
+				FROM (
+					SELECT
+						"ptm".*,
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("pt")), '[]'::json)
+							FROM (
+								SELECT
+									"pt".*
+								FROM "promotions" "pt"
+								WHERE "pt"."id" = "ptm"."promotion_id"
+							) AS "pt"
+						) AS "promotions",
+					FROM "promotion_house_models" "ptm"
+					WHERE "ptm"."house_model_id" = "hm"."id"
+				) AS "ptm"
+			) AS "promotions"
 			FROM "house_models" "hm"
 		WHERE "hm"."project_id" = $1
 	)
