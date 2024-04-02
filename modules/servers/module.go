@@ -202,6 +202,7 @@ func (m *moduleFactory) HouseModelModule() {
 
 	router := m.r.Group("/house_models")
 
+	router.Get("/all", handler.FindAllHouseModel)
 	router.Get("/:house_model_id", handler.FindOneHouseModel)
 	router.Get("/projects/:project_id", handler.FindHouseModel)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)

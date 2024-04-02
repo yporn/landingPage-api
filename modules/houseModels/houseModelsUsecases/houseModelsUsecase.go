@@ -10,6 +10,7 @@ import (
 
 type IHouseModelsUsecase interface {
 	FindOneHouseModel(houseId string) (*houseModels.HouseModel, error)
+	FindAllHouseModels() ([]houseModels.HouseModelName, error) 
 	FindHouseModel(projectId string, req *houseModels.HouseModelFilter) *entities.PaginateRes
 	AddHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
 	UpdateHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
@@ -28,6 +29,14 @@ func HouseModelsUsecases(houseModelsRepository houseModelsRepositories.IHouseMod
 
 func (u *houseModelsUsecase) FindOneHouseModel(houseId string) (*houseModels.HouseModel, error) {
 	houseModel, err := u.houseModelsRepository.FindOneHouseModel(houseId)
+	if err != nil {
+		return nil, err
+	}
+	return houseModel, nil
+}
+
+func (u *houseModelsUsecase) FindAllHouseModels() ([]houseModels.HouseModelName, error) {
+	houseModel, err := u.houseModelsRepository.FindAllHouseModels()
 	if err != nil {
 		return nil, err
 	}

@@ -47,3 +47,8 @@ type HouseModelFilter struct {
 	*entities.PaginationReq
 	*entities.SortReq
 }
+
+type HouseModelName struct {
+    Id   int    `json:"id"`
+    Name string `json:"name"`
+}

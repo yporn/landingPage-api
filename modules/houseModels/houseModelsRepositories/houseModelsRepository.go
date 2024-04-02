@@ -15,11 +15,13 @@ import (
 
 type IHouseModelsRepository interface {
 	FindOneHouseModel(houseId string) (*houseModels.HouseModel, error)
+	FindAllHouseModels() ([]houseModels.HouseModelName, error)
 	InsertHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
 	FindHouseModel(projectId string, req *houseModels.HouseModelFilter) ([]*houseModels.HouseModel, int)
 	UpdateHouseModel(req *houseModels.HouseModel) (*houseModels.HouseModel, error)
 	DeleteHouseModel(houseId string) error
 }
+
 
 type houseModelsRepository struct {
 	db           *sqlx.DB
@@ -34,6 +36,37 @@ func HouseModelsRepository(db *sqlx.DB, cfg config.IConfig, filesUsecase filesUs
 		filesUsecase: filesUsecase,
 	}
 }
+
+func (r *houseModelsRepository) FindAllHouseModels() ([]houseModels.HouseModelName, error) {
+    query := `
+        SELECT 
+			"hm"."id",
+			"hm"."name"
+        FROM "house_models" "hm";
+    `
+    rows, err := r.db.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("get house models failed: %v", err)
+    }
+    defer rows.Close()
+
+    var houseModelNames []houseModels.HouseModelName
+    for rows.Next() {
+        var houseModelName houseModels.HouseModelName
+        if err := rows.Scan(&houseModelName.Id, &houseModelName.Name); err != nil {
+            return nil, fmt.Errorf("scan house model name failed: %v", err)
+        }
+
+        houseModelNames = append(houseModelNames, houseModelName)
+    }
+
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("row error: %v", err)
+    }
+
+    return houseModelNames, nil
+}
+
 
 func (r *houseModelsRepository) FindOneHouseModel(houseId string) (*houseModels.HouseModel, error) {
 	query := `

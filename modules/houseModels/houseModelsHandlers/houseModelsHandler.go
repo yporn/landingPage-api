@@ -20,6 +20,7 @@ type houseModelsHandlersErrCode string
 const (
 	findOneHouseModelErr houseModelsHandlersErrCode = "houses-001"
 	findHouseModelErr    houseModelsHandlersErrCode = "houses-002"
+	findAllHouseModelErr houseModelsHandlersErrCode = "houses-006"
 	insertHouseModelErr  houseModelsHandlersErrCode = "houses-003"
 	deleteHouseModelErr  houseModelsHandlersErrCode = "houses-004"
 	updateHouseModelErr  houseModelsHandlersErrCode = "houses-005"
@@ -28,6 +29,7 @@ const (
 type IHouseModelsHandler interface {
 	FindOneHouseModel(c *fiber.Ctx) error
 	FindHouseModel(c *fiber.Ctx) error
+	FindAllHouseModel(c *fiber.Ctx) error
 	AddHouseModel(c *fiber.Ctx) error
 	UpdateHouseModel(c *fiber.Ctx) error
 	DeleteHouseModel(c *fiber.Ctx) error
@@ -59,6 +61,18 @@ func (h *houseModelsHandler) FindOneHouseModel(c *fiber.Ctx) error {
 		).Res()
 	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, house).Res()
+}
+
+func (h *houseModelsHandler) FindAllHouseModel(c *fiber.Ctx) error {
+	houses, err := h.houseModelsUsecases.FindAllHouseModels()
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(findAllHouseModelErr),
+			err.Error(),
+		).Res()
+	}
+	return entities.NewResponse(c).Success(fiber.StatusOK, houses).Res()
 }
 
 func (h *houseModelsHandler) FindHouseModel(c *fiber.Ctx) error {
