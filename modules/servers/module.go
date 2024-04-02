@@ -86,18 +86,21 @@ func (m *moduleFactory) MonitorModule() {
 }
 
 func (m *moduleFactory) UserModule() {
-	repository := usersRepositories.UsersRepository(m.s.db)
+	repository := usersRepositories.UsersRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := usersUsecases.UsersUsecase(m.s.cfg, repository)
-	handler := usersHandlers.UsersHandler(m.s.cfg, usecase)
+	handler := usersHandlers.UsersHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
 
 	// route
 	router := m.r.Group("/users")
 
+	router.Get("/:user_id", handler.FindOneUser)
+	router.Get("/", handler.FindUser)
 	router.Post("/signup", m.mid.JwtAuth(), handler.SignUp)
 	router.Post("/signin", handler.SignIn)
 	router.Post("/refresh", m.mid.JwtAuth(), handler.RefreshPassport)
 	router.Post("/signout", handler.SignOut)
-
+	router.Patch("/update/:user_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateUser)
+	router.Delete("/:user_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteUser)
 	router.Get("/admin/secret", m.mid.JwtAuth(), m.mid.Authorize(2), handler.GenerateAdminToken)
 }
 

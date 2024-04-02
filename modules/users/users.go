@@ -32,6 +32,7 @@ type UserRegisterReq struct {
 }
 
 type UserRole struct {
+	Id     int `db:"id" json:"id"`
 	UserId int `db:"user_id" json:"user_id"`
 	RoleId int `db:"role_id" json:"role_id"`
 }
@@ -93,4 +94,11 @@ func (obj *User) IsEmail() bool {
 		return false
 	}
 	return match
+}
+
+type UserFilter struct {
+	Id     string `query:"id"`
+	Search string `query:"search"` // name & username & email
+	*entities.PaginationReq
+	*entities.SortReq
 }

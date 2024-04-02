@@ -1,7 +1,7 @@
 BEGIN;
 
 --set timezone
-SET timezone TO 'UTC';
+SET TIME ZONE 'UTC';
 
 --Install uuid extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -79,7 +79,7 @@ func (h *middlewaresHandler) Logger() fiber.Handler {
 func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := strings.TrimPrefix(c.Get("Authorization"), "Bearer ")
-		fmt.Println("Token:", token) // ปริ้นค่า Token ก่อนที่จะทำการ Parse
+		// fmt.Println("Token:", token) // ปริ้นค่า Token ก่อนที่จะทำการ Parse
 
 		result, err := auth.ParseToken(h.cfg.Jwt(), token)
 		if err != nil {
@@ -91,7 +91,7 @@ func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 		}
 
 		claims := result.Claims
-		fmt.Println("Claims:", claims) // ปริ้นค่า claims หลังจาก Parse Token
+		// fmt.Println("Claims:", claims) // ปริ้นค่า claims หลังจาก Parse Token
 
 		if !h.middlewaresUsecase.FindAccessToken(claims.Id, token) {
 			return entities.NewResponse(c).Error(
