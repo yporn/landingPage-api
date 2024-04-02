@@ -89,7 +89,7 @@ func (b *findProjectBuilder) initQuery() {
 				FROM (
 					SELECT
 						"ci".*
-					FROM "project_comfortable_items" "ci"
+					FROM "project_facility_items" "ci"
 					WHERE "ci"."project_id" = "p"."id"
 					
 				) AS "cit"
