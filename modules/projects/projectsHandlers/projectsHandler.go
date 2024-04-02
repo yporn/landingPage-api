@@ -94,7 +94,7 @@ func (h *projectsHandler) FindProject(c *fiber.Ctx) error {
 		req.Page = 1
 	}
 	if req.Limit < 5 {
-		req.Limit = 5
+		req.Limit = 1000000
 	}
 
 	// Sort
