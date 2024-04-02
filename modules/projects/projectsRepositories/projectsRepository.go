@@ -187,7 +187,17 @@ func (r *projectsRepository) FindProjectHouseModel(projectId string) (*projects.
 											COALESCE(array_to_json(array_agg("pt")), '[]'::json)
 										FROM (
 											SELECT
-												"pt".*
+												"pt".*,
+												(
+													SELECT
+														COALESCE(array_to_json(array_agg("ptf")), '[]'::json)
+													FROM (
+														SELECT
+															"ptf".*
+														FROM "promotion_free_items" "ptf"
+														WHERE  "pt"."id" = "ptf"."promotion_id"
+													) AS "ptf"
+												) AS "free_items"
 											FROM "promotions" "pt"
 											WHERE  "ptm"."promotion_id" = "pt"."id"
 										) AS "pt"
