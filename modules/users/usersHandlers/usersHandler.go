@@ -188,17 +188,17 @@ func (h *usersHandler) SignIn(c *fiber.Ctx) error {
 		).Res()
 	}
 
-	// Log activity
-	userID := utils.GetUserIDFromContext(c)
-	err = utils.LogActivity(h.db, strconv.Itoa(userID), "login", "เข้าสู่ระบบ")
-	if err != nil {
-		// Handle error if logging fails
-		return entities.NewResponse(c).Error(
-			fiber.ErrInternalServerError.Code,
-			fmt.Sprintf("Failed to log activity %v", userID),
-			err.Error(),
-		).Res()
-	}
+	// // Log activity
+	// userID := utils.GetUserIDFromContext(c)
+	// err = utils.LogActivity(h.db, strconv.Itoa(userID), "login", "เข้าสู่ระบบ")
+	// if err != nil {
+	// 	// Handle error if logging fails
+	// 	return entities.NewResponse(c).Error(
+	// 		fiber.ErrInternalServerError.Code,
+	// 		fmt.Sprintf("Failed to log activity %v", userID),
+	// 		err.Error(),
+	// 	).Res()
+	// }
 
 	return entities.NewResponse(c).Success(fiber.StatusOK, passport).Res()
 }
