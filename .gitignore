@@ -29,7 +29,7 @@
 vendor/
 vendor
 /Godeps/
-/assets
+/assets/*
 /database/*
 
 # Customs

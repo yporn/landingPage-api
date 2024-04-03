@@ -6,6 +6,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesHandlers"
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesRepositories"
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesUsecases"
+	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsHandlers"
+	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsRepositories"
+	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsUsecases"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoHandlers"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoRepositories"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoUsecases"
@@ -56,6 +59,7 @@ type IModuleFactory interface {
 	HouseModelModule()
 	PromotionModule()
 	LogoModule()
+	ActivityLogModule()
 }
 
 type moduleFactory struct {
@@ -248,4 +252,16 @@ func (m *moduleFactory) LogoModule() {
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.AddLogo)
 	router.Patch("/update/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateLogo)
 	router.Delete("/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.DeleteLogo)
+}
+
+func (m *moduleFactory) ActivityLogModule() {
+	
+	repository := activityLogsRepositories.ActivityLogsRepository(m.s.db)
+	usecase := activityLogsUsecases.ActivityLogsUsecases(repository)
+	handler := activityLogsHandlers.ActivityLogsHandler(m.s.cfg, usecase)
+
+	router := m.r.Group("/activityLogs")
+
+	router.Get("/", handler.FindAllActivityLogs)
+	
 }

@@ -6,6 +6,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"math"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,14 +92,12 @@ func (h *filesHandler) UploadFiles(c *fiber.Ctx) error {
 				Extension:   ext,
 			})
 		} else {
-			// Generate a random filename for the WebP image
+			// Convert other image formats to webp
 			webPFileName := utils.RandFileName("webp")
 			webPFilePath := filepath.Join(destination, webPFileName)
 
-			// Save uploaded file to a temporary location
-			tempFilePath := filepath.Join(os.TempDir(), file.Filename)
-			err := c.SaveFile(file, tempFilePath)
-			if err != nil {
+			// Convert to WebP directly without saving to temporary location
+			if err := convertToWebP(file, webPFilePath); err != nil {
 				return entities.NewResponse(c).Error(
 					fiber.ErrInternalServerError.Code,
 					string(uploadErr),
@@ -106,15 +105,7 @@ func (h *filesHandler) UploadFiles(c *fiber.Ctx) error {
 				).Res()
 			}
 
-			// Create a WebP file
-			if err := convertToWebP(tempFilePath, webPFilePath); err != nil {
-				return entities.NewResponse(c).Error(
-					fiber.ErrInternalServerError.Code,
-					string(uploadErr),
-					err.Error(),
-				).Res()
-			}
-
+			// Add the WebP file to the list of files to be uploaded
 			req = append(req, &files.FileReq{
 				File:        file,
 				Destination: destination + "/" + webPFileName,
@@ -155,16 +146,18 @@ func (h *filesHandler) DeleteFile(c *fiber.Ctx) error {
 	return entities.NewResponse(c).Success(fiber.StatusOK, nil).Res()
 }
 
-func convertToWebP(inputPath, outputPath string) error {
+func convertToWebP(file *multipart.FileHeader, outputPath string) error {
 	//open file
-	inputFile, err := os.Open(inputPath)
+	inputFile, err := file.Open()
 	if err != nil {
 		return err
 	}
 	defer inputFile.Close()
 
 	var img image.Image
-	switch strings.ToLower(filepath.Ext(inputPath)) {
+	fileName := file.Filename
+
+	switch strings.ToLower(filepath.Ext(fileName)) {
 	case ".png":
 		img, err = png.Decode(inputFile)
 		if err != nil {
@@ -179,7 +172,13 @@ func convertToWebP(inputPath, outputPath string) error {
 		return fmt.Errorf("unsupported image format")
 	}
 
-	outputFile, err := os.Create(outputPath)
+	// Create the directory if it doesn't exist
+	err = os.MkdirAll("./assets/images/convert/"+filepath.Dir(outputPath), 0755)
+	if err != nil {
+		return err
+	}
+
+	outputFile, err := os.Create("./assets/images/convert/" + outputPath)
 	if err != nil {
 		return err
 	}
@@ -187,6 +186,11 @@ func convertToWebP(inputPath, outputPath string) error {
 
 	err = webp.Encode(outputFile, img, nil)
 	if err != nil {
+		return err
+	}
+
+	// Delete the directory after encoding the file to WebP
+	if err := os.RemoveAll("./assets/images/convert/"); err != nil {
 		return err
 	}
 

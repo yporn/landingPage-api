@@ -59,6 +59,7 @@ func (s *server) Start() {
 	modules.HouseModelModule()
 	modules.PromotionModule()
 	modules.LogoModule()
+	modules.ActivityLogModule()
 	
 	s.app.Use(middlewares.RouterCheck())
 	//Graceful Shutdown
