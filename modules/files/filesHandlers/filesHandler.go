@@ -2,16 +2,21 @@ package filesHandlers
 
 import (
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/chai2010/webp"
+	"github.com/gofiber/fiber/v2"
 	"github.com/yporn/sirarom-backend/config"
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/pkg/utils"
-	"github.com/gofiber/fiber/v2"
 )
 
 type filesHandlersErrCode string
@@ -57,7 +62,9 @@ func (h *filesHandler) UploadFiles(c *fiber.Ctx) error {
 		"png":  "png",
 		"jpg":  "jpg",
 		"jpeg": "jpeg",
+		"webp": "webp",
 	}
+
 	for _, file := range filesReq {
 		ext := strings.TrimPrefix(filepath.Ext(file.Filename), ".")
 		if extMap[ext] != ext || extMap[ext] == "" {
@@ -76,13 +83,45 @@ func (h *filesHandler) UploadFiles(c *fiber.Ctx) error {
 			).Res()
 		}
 
-		filename := utils.RandFileName(ext)
-		req = append(req, &files.FileReq{
-			File:        file,
-			Destination: destination + "/" + filename,
-			FileName:    filename,
-			Extension:   ext,
-		})
+		if ext == "webp" {
+			req = append(req, &files.FileReq{
+				File:        file,
+				Destination: destination + "/" + file.Filename,
+				FileName:    file.Filename,
+				Extension:   ext,
+			})
+		} else {
+			// Generate a random filename for the WebP image
+			webPFileName := utils.RandFileName("webp")
+			webPFilePath := filepath.Join(destination, webPFileName)
+
+			// Save uploaded file to a temporary location
+			tempFilePath := filepath.Join(os.TempDir(), file.Filename)
+			err := c.SaveFile(file, tempFilePath)
+			if err != nil {
+				return entities.NewResponse(c).Error(
+					fiber.ErrInternalServerError.Code,
+					string(uploadErr),
+					err.Error(),
+				).Res()
+			}
+
+			// Create a WebP file
+			if err := convertToWebP(tempFilePath, webPFilePath); err != nil {
+				return entities.NewResponse(c).Error(
+					fiber.ErrInternalServerError.Code,
+					string(uploadErr),
+					err.Error(),
+				).Res()
+			}
+
+			req = append(req, &files.FileReq{
+				File:        file,
+				Destination: destination + "/" + webPFileName,
+				FileName:    webPFileName,
+				Extension:   "webp",
+			})
+		}
 	}
 
 	res, err := h.filesUsecase.UploadToStorage(req)
@@ -114,4 +153,45 @@ func (h *filesHandler) DeleteFile(c *fiber.Ctx) error {
 		).Res()
 	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, nil).Res()
+}
+
+func convertToWebP(inputPath, outputPath string) error {
+	// Open the input image file
+	inputFile, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close()
+
+	// Decode the input image based on its file extension
+	var img image.Image
+	switch strings.ToLower(filepath.Ext(inputPath)) {
+	case ".png":
+		img, err = png.Decode(inputFile)
+		if err != nil {
+			return err
+		}
+	case ".jpg", ".jpeg":
+		img, err = jpeg.Decode(inputFile)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unsupported image format")
+	}
+
+	// Create the output WebP file
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+
+	// Encode the image to WebP format
+	err = webp.Encode(outputFile, img, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
