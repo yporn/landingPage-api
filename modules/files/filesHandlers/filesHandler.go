@@ -156,14 +156,12 @@ func (h *filesHandler) DeleteFile(c *fiber.Ctx) error {
 }
 
 func convertToWebP(inputPath, outputPath string) error {
-	// Open the input image file
 	inputFile, err := os.Open(inputPath)
 	if err != nil {
 		return err
 	}
 	defer inputFile.Close()
 
-	// Decode the input image based on its file extension
 	var img image.Image
 	switch strings.ToLower(filepath.Ext(inputPath)) {
 	case ".png":
@@ -180,14 +178,12 @@ func convertToWebP(inputPath, outputPath string) error {
 		return fmt.Errorf("unsupported image format")
 	}
 
-	// Create the output WebP file
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		return err
 	}
 	defer outputFile.Close()
 
-	// Encode the image to WebP format
 	err = webp.Encode(outputFile, img, nil)
 	if err != nil {
 		return err
