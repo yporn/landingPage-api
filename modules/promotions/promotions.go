@@ -25,6 +25,7 @@ type PromotionFreeItem struct {
 
 type PromotionHouseModel struct {
 	Id           int           `db:"id" json:"id"`
+	PromotionId  int           `db:"promotion_id" json:"promotion_id"`
 	HouseModelId int           `db:"house_model_id" json:"house_model_id"`
 	HouseModel   []*HouseModel `json:"house_model_name"`
 }
