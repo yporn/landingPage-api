@@ -7,12 +7,6 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 )
 
-type activityLogsHandlersErrCode string
-
-const (
-	findAllActivityLogsErr activityLogsHandlersErrCode = "activityLogs-001"
-)
-
 type IActivityLogsHandler interface {
 	FindAllActivityLogs(c *fiber.Ctx) error
 }
@@ -34,7 +28,7 @@ func (h *activityLogsHandler) FindAllActivityLogs(c *fiber.Ctx) error {
 	if err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
-			string(findAllActivityLogsErr),
+			"Failed to retrieve activity logs",
 			err.Error(),
 		).Res()
 	}

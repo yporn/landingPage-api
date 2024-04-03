@@ -22,28 +22,36 @@ func ActivityLogsRepository(db *sqlx.DB) IActivityLogsRepository {
 }
 
 func (r *activityLogsRepository) FindActivityLog() ([]activityLogs.ActivityLog, error) {
-	query := `
-		SELECT * FROM "activity_logs";
-	`
-	rows, err := r.db.Query(query)
+    query := `
+        SELECT 
+		"a"."id",
+		"a"."user_id",
+		"u"."name",
+		"a"."action",
+		"a"."details"
+		FROM "activity_logs" "a"
+		LEFT JOIN "users" AS "u" ON "a"."user_id" = "u"."id"
+    `
+    rows, err := r.db.Query(query)
     if err != nil {
-        return nil, fmt.Errorf("get house models failed: %v", err)
+        return nil, fmt.Errorf("query failed: %v", err)
     }
     defer rows.Close()
 
+    var activityLogData []activityLogs.ActivityLog
+    for rows.Next() {
+        var activityLog activityLogs.ActivityLog
+        // Initialize the User field before scanning into it
+        activityLog.User = &activityLogs.User{}
+        if err := rows.Scan(&activityLog.Id, &activityLog.User.Id, &activityLog.User.Name, &activityLog.Action, &activityLog.Detail); err != nil {
+            return nil, fmt.Errorf("scan activity log failed: %v", err)
+        }
+        activityLogData = append(activityLogData, activityLog)
+    }
 
-	var activityLogData []activityLogs.ActivityLog
-	for rows.Next() {
-		var activityLog activityLogs.ActivityLog
-		if err := rows.Scan(&activityLog.Id, &activityLog.User.Id, &activityLog.User.Name, &activityLog.Action, &activityLog.Detail); err != nil {
-			return nil, fmt.Errorf("scan activity log failed: %v", err)
-		}
-		activityLogData = append(activityLogData, activityLog)
-	}
-
-	if err := rows.Err(); err != nil {
+    if err := rows.Err(); err != nil {
         return nil, fmt.Errorf("row error: %v", err)
     }
 
-	return activityLogData, nil
+    return activityLogData, nil
 }
