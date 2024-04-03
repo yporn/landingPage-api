@@ -13,7 +13,6 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/middlewares/middlewaresUsecases"
 	"github.com/yporn/sirarom-backend/pkg/auth"
-	// "github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type middlewareHandlersErrCode string

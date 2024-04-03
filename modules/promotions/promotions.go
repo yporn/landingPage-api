@@ -25,21 +25,22 @@ type PromotionFreeItem struct {
 
 type PromotionHouseModel struct {
 	Id           int           `db:"id" json:"id"`
-	PromotionId  int           `db:"promotion_id" json:"promotion_id"`
 	HouseModelId int           `db:"house_model_id" json:"house_model_id"`
 	HouseModel   []*HouseModel `json:"house_model_name"`
 }
 
 type HouseModel struct {
 	Id        int               `json:"id"`
+	ProjectId int               `json:"project_id"`
 	Name      string            `json:"name"`
 	HouseType []*HouseModelType `json:"house_type"`
+	Images    []*entities.Image `json:"house_images"`
 }
 
 type HouseModelType struct {
 	Id       int    `json:"id"`
 	RoomType string `json:"room_type"`
-	Amount   int `json:"amount"`
+	Amount   int    `json:"amount"`
 }
 
 type PromotionFilter struct {

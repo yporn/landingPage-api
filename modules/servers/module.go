@@ -86,9 +86,10 @@ func (m *moduleFactory) MonitorModule() {
 }
 
 func (m *moduleFactory) UserModule() {
+	db := m.s.db.DB
 	repository := usersRepositories.UsersRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := usersUsecases.UsersUsecase(m.s.cfg, repository)
-	handler := usersHandlers.UsersHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := usersHandlers.UsersHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	// route
 	router := m.r.Group("/users")
@@ -99,9 +100,9 @@ func (m *moduleFactory) UserModule() {
 	router.Post("/signin", handler.SignIn)
 	router.Post("/refresh", m.mid.JwtAuth(), handler.RefreshPassport)
 	router.Post("/signout", handler.SignOut)
-	router.Patch("/update/:user_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateUser)
-	router.Delete("/:user_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteUser)
-	router.Get("/admin/secret", m.mid.JwtAuth(), m.mid.Authorize(2), handler.GenerateAdminToken)
+	router.Patch("/update/:user_id", m.mid.JwtAuth(), m.mid.Authorize(), handler.UpdateUser)
+	router.Delete("/:user_id", m.mid.JwtAuth(), m.mid.Authorize(), handler.DeleteUser)
+	router.Get("/admin/secret", m.mid.JwtAuth(), m.mid.Authorize(), handler.GenerateAdminToken)
 }
 
 func (m *moduleFactory) AppinfoModule() {
@@ -115,23 +116,25 @@ func (m *moduleFactory) AppinfoModule() {
 }
 
 func (m *moduleFactory) JobModule() {
+	db := m.s.db.DB
 	repository := jobsRepositories.JobsRepository(m.s.db, m.s.cfg)
 	usecase := jobsUsecases.JobsUsecase(repository)
-	handler := jobsHandlers.JobsHandler(m.s.cfg, usecase)
+	handler := jobsHandlers.JobsHandler(m.s.cfg, usecase, db)
 
 	router := m.r.Group("/jobs")
 
 	router.Get("/:job_id", handler.FindOneJob)
 	router.Get("/", handler.FindJob)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddJob)
-	router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateJob)
-	router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteJob)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(6), handler.AddJob)
+	router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(6), handler.UpdateJob)
+	router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(6), handler.DeleteJob)
 }
 
 func (m *moduleFactory) GeneralModule() {
+	db := m.s.db.DB
 	repository := generalRepositories.GeneralRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := generalUsecases.GeneralUsecase(repository)
-	handler := generalHandlers.GeneralHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := generalHandlers.GeneralHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/data_setting")
 
@@ -140,24 +143,26 @@ func (m *moduleFactory) GeneralModule() {
 }
 
 func (m *moduleFactory) InterestModule() {
+	db := m.s.db.DB
 	repository := interestsRepositories.InterestsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := interestsUsecases.InterestsUsecase(repository)
-	handler := interestsHandlers.InterestsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := interestsHandlers.InterestsHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/interests")
 
 	router.Get("/:interest_id", handler.FindOneInterest)
 	router.Get("/", handler.FindInterest)
 
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddInterest)
-	router.Patch("/update/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateInterest)
-	router.Delete("/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteInterest)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(3), handler.AddInterest)
+	router.Patch("/update/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.UpdateInterest)
+	router.Delete("/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.DeleteInterest)
 }
 
 func (m *moduleFactory) BannerModule() {
+	db := m.s.db.DB
 	repository := bannersRepositories.BannersRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := bannersUsecases.BannersUsecase(repository)
-	handler := bannersHandlers.BannersHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := bannersHandlers.BannersHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/banners")
 
@@ -178,65 +183,69 @@ func (m *moduleFactory) ActivityModule() {
 
 	router.Get("/:activity_id", handler.FindOneActivity)
 	router.Get("/", handler.FindActivity)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddActivity)
-	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateActivity)
-	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteActivity)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(5), handler.AddActivity)
+	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(5), handler.UpdateActivity)
+	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(5), handler.DeleteActivity)
 }
 
 func (m *moduleFactory) ProjectModule() {
+	db := m.s.db.DB
 	repository := projectsRepositories.ProjectsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := projectsUsecases.ProjectsUsecase(repository)
-	handler := projectsHandlers.ProjectsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := projectsHandlers.ProjectsHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/projects")
 
 	router.Get("/:project_id", handler.FindOneProject)
 	router.Get("/", handler.FindProject)
 	router.Get("/:project_id/house_models", handler.FindProjectHouseModel)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProject)
-	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateProject)
-	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteProject)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(3), handler.AddProject)
+	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.UpdateProject)
+	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.DeleteProject)
 }
 
 func (m *moduleFactory) HouseModelModule() {
+	db := m.s.db.DB
 	repository := houseModelsRepositories.HouseModelsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := houseModelsUsecases.HouseModelsUsecases(repository)
-	handler := houseModelsHandlers.HouseModelsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := houseModelsHandlers.HouseModelsHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/house_models")
 
 	router.Get("/all", handler.FindAllHouseModel)
 	router.Get("/:house_model_id", handler.FindOneHouseModel)
 	router.Get("/projects/:project_id", handler.FindHouseModel)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddHouseModel)
-	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateHouseModel)
-	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteHouseModel)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(3), handler.AddHouseModel)
+	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.UpdateHouseModel)
+	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(3), handler.DeleteHouseModel)
 }
 
 func (m *moduleFactory) PromotionModule() {
+	db := m.s.db.DB
 	repository := promotionsRepositories.PromotionsRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := promotionsUsecases.PromotionsUsecase(repository)
-	handler := promotionsHandlers.PromotionsHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := promotionsHandlers.PromotionsHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/promotions")
 
 	router.Get("/", handler.FindPromotion)
 	router.Get("/:promotion_id", handler.FindOnePromotion)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddPromotion)
-	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), handler.UpdatePromotion)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(4), handler.AddPromotion)
+	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(4), handler.UpdatePromotion)
 	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(4), handler.DeletePromotion)
 }
 
 func (m *moduleFactory) LogoModule() {
+	db := m.s.db.DB
 	repository := logosRepositories.LogosRepository(m.s.db, m.s.cfg, m.FilesModule().Usecase())
 	usecase := logosUsecases.LogosUsecase(repository)
-	handler := logosHandlers.LogosHandler(m.s.cfg, usecase, m.FilesModule().Usecase())
+	handler := logosHandlers.LogosHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
 	router := m.r.Group("/logos")
 
 	router.Get("/", handler.FindLogo)
 	router.Get("/:logo_id", handler.FindOneLogo)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddLogo)
-	router.Patch("/update/:logo_id", m.mid.JwtAuth(), handler.UpdateLogo)
+	router.Patch("/update/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UpdateLogo)
 	router.Delete("/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteLogo)
 }

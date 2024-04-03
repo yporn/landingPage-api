@@ -1,6 +1,7 @@
 package usersHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"path"
 	"strconv"
@@ -14,6 +15,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/users"
 	"github.com/yporn/sirarom-backend/modules/users/usersUsecases"
 	"github.com/yporn/sirarom-backend/pkg/auth"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type userHandlersErrCode string
@@ -32,7 +34,7 @@ const (
 
 type IUsersHandler interface {
 	FindOneUser(c *fiber.Ctx) error
-	FindUser(c *fiber.Ctx) error 
+	FindUser(c *fiber.Ctx) error
 	SignUp(c *fiber.Ctx) error
 	SignIn(c *fiber.Ctx) error
 	RefreshPassport(c *fiber.Ctx) error
@@ -46,13 +48,15 @@ type usersHandler struct {
 	cfg          config.IConfig
 	usersUsecase usersUsecases.IUsersUsecase
 	filesUsecase filesUsecases.IFilesUsecase
+	db           *sql.DB
 }
 
-func UsersHandler(cfg config.IConfig, usersUsecase usersUsecases.IUsersUsecase, filesUsecase filesUsecases.IFilesUsecase) IUsersHandler {
+func UsersHandler(cfg config.IConfig, usersUsecase usersUsecases.IUsersUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IUsersHandler {
 	return &usersHandler{
 		cfg:          cfg,
 		usersUsecase: usersUsecase,
 		filesUsecase: filesUsecase,
+		db:           db,
 	}
 }
 
@@ -149,6 +153,19 @@ func (h *usersHandler) SignUp(c *fiber.Ctx) error {
 			).Res()
 		}
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลผู้ใช้งาน : "+req.Username)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, result).Res()
 }
 
@@ -167,6 +184,18 @@ func (h *usersHandler) SignIn(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,
 			string(SignInErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "login", "เข้าสู่ระบบ")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}
@@ -273,6 +302,19 @@ func (h *usersHandler) UpdateUser(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลผู้ใช้งาน : "+user.Username)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, user).Res()
 }
 
@@ -311,6 +353,18 @@ func (h *usersHandler) DeleteUser(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(DeleteUserErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลผู้ใช้งาน : "+user.Username)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}

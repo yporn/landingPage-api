@@ -1,6 +1,7 @@
 package houseModelsHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"path"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/houseModels"
 	"github.com/yporn/sirarom-backend/modules/houseModels/houseModelsUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type houseModelsHandlersErrCode string
@@ -39,13 +41,15 @@ type houseModelsHandler struct {
 	cfg                 config.IConfig
 	houseModelsUsecases houseModelsUsecases.IHouseModelsUsecase
 	filesUsecase        filesUsecases.IFilesUsecase
+	db                  *sql.DB
 }
 
-func HouseModelsHandler(cfg config.IConfig, houseModelsUsecase houseModelsUsecases.IHouseModelsUsecase, filesUsecase filesUsecases.IFilesUsecase) IHouseModelsHandler {
+func HouseModelsHandler(cfg config.IConfig, houseModelsUsecase houseModelsUsecases.IHouseModelsUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IHouseModelsHandler {
 	return &houseModelsHandler{
 		cfg:                 cfg,
 		houseModelsUsecases: houseModelsUsecase,
 		filesUsecase:        filesUsecase,
+		db:                  db,
 	}
 }
 
@@ -178,6 +182,19 @@ func (h *houseModelsHandler) AddHouseModel(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลแบบบ้าน : "+houseModel.Name)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, houseModel).Res()
 }
 
@@ -215,6 +232,19 @@ func (h *houseModelsHandler) UpdateHouseModel(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลแบบบ้าน : "+houseModel.Name)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, houseModel).Res()
 }
 
@@ -260,6 +290,18 @@ func (h *houseModelsHandler) DeleteHouseModel(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+		// Log activity
+		userID := utils.GetUserIDFromContext(c)
+		err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลแบบบ้าน : "+houseModel.Name)
+		if err != nil {
+			// Handle error if logging fails
+			return entities.NewResponse(c).Error(
+				fiber.ErrInternalServerError.Code,
+				fmt.Sprintf("Failed to log activity %v", userID),
+				err.Error(),
+			).Res()
+		}
 
 	return entities.NewResponse(c).Success(fiber.StatusNoContent, nil).Res()
 }

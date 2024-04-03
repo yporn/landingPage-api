@@ -1,6 +1,7 @@
 package interestsHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/interests"
 	"github.com/yporn/sirarom-backend/modules/interests/interestsUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type interestsHandlersErrCode string
@@ -36,13 +38,15 @@ type interestsHandler struct {
 	cfg              config.IConfig
 	interestsUsecase interestsUsecases.IInterestsUsecase
 	filesUsecase     filesUsecases.IFilesUsecase
+	db               *sql.DB
 }
 
-func InterestsHandler(cfg config.IConfig, interestsUsecase interestsUsecases.IInterestsUsecase, filesUsecase filesUsecases.IFilesUsecase) IInterestsHandler {
+func InterestsHandler(cfg config.IConfig, interestsUsecase interestsUsecases.IInterestsUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IInterestsHandler {
 	return &interestsHandler{
 		cfg:              cfg,
 		interestsUsecase: interestsUsecase,
 		filesUsecase:     filesUsecase,
+		db:               db,
 	}
 }
 
@@ -113,12 +117,25 @@ func (h *interestsHandler) AddInterest(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลดอกเบี้ย : "+interest.BankName)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, interest).Res()
 }
 
 func (h *interestsHandler) DeleteInterest(c *fiber.Ctx) error {
 	interestId := strings.Trim(c.Params("interest_id"), " ")
-	
+
 	// Check if the interest ID is empty
 	if interestId == "" {
 		return entities.NewResponse(c).Error(
@@ -127,7 +144,7 @@ func (h *interestsHandler) DeleteInterest(c *fiber.Ctx) error {
 			"Interest ID is empty",
 		).Res()
 	}
-	activity, err := h.interestsUsecase.FindOneInterest(interestId)
+	interest, err := h.interestsUsecase.FindOneInterest(interestId)
 	if err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
@@ -137,7 +154,7 @@ func (h *interestsHandler) DeleteInterest(c *fiber.Ctx) error {
 	}
 
 	deleteFileReq := make([]*files.DeleteFileReq, 0)
-	for _, p := range activity.Images {
+	for _, p := range interest.Images {
 		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
 			Destination: fmt.Sprintf("interests/%s", p.FileName),
 		})
@@ -159,22 +176,34 @@ func (h *interestsHandler) DeleteInterest(c *fiber.Ctx) error {
 		).Res()
 	}
 
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลดอกเบี้ย : "+interest.BankName)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusNoContent, nil).Res()
 }
 
 func (h *interestsHandler) UpdateInterest(c *fiber.Ctx) error {
 	interestIdStr := strings.Trim(c.Params("interest_id"), " ")
-    interestId, err := strconv.Atoi(interestIdStr)
+	interestId, err := strconv.Atoi(interestIdStr)
 	if err != nil {
-        return entities.NewResponse(c).Error(
-            fiber.ErrBadRequest.Code,
-            string(updateInterestErr),
-            err.Error(),
-        ).Res()
-    }
-	
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updateInterestErr),
+			err.Error(),
+		).Res()
+	}
+
 	req := &interests.Interest{
-		Images:   make([]*entities.Image, 0),
+		Images: make([]*entities.Image, 0),
 	}
 
 	if err := c.BodyParser(req); err != nil {
@@ -194,5 +223,18 @@ func (h *interestsHandler) UpdateInterest(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลดอกเบี้ย : "+interest.BankName)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, interest).Res()
 }

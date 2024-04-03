@@ -1,6 +1,7 @@
 package projectsHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"path"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/projects"
 	"github.com/yporn/sirarom-backend/modules/projects/projectsUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type projectsHandlersErrCode string
@@ -38,13 +40,15 @@ type projectsHandler struct {
 	cfg              config.IConfig
 	projectsUsecases projectsUsecases.IProjectsUsecase
 	filesUsecase     filesUsecases.IFilesUsecase
+	db *sql.DB
 }
 
-func ProjectsHandler(cfg config.IConfig, projectsUsecase projectsUsecases.IProjectsUsecase, filesUsecase filesUsecases.IFilesUsecase) IProjectsHandler {
+func ProjectsHandler(cfg config.IConfig, projectsUsecase projectsUsecases.IProjectsUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IProjectsHandler {
 	return &projectsHandler{
 		cfg:              cfg,
 		projectsUsecases: projectsUsecase,
 		filesUsecase:     filesUsecase,
+		db: db,
 	}
 }
 
@@ -169,6 +173,19 @@ func (h *projectsHandler) AddProject(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลโครงการ : "+project.Name)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, project).Res()
 }
 
@@ -207,6 +224,19 @@ func (h *projectsHandler) UpdateProject(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลโครงการ : "+project.Name)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, project).Res()
 }
 
@@ -241,6 +271,18 @@ func (h *projectsHandler) DeleteProject(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deleteProjectErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลโครงการ : "+project.Name)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}

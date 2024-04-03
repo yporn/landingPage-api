@@ -1,6 +1,8 @@
 package generalHandlers
 
 import (
+	"database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/general"
 	"github.com/yporn/sirarom-backend/modules/general/generalUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type generalHandlersErrCode string
@@ -28,13 +31,15 @@ type generalHandler struct {
 	cfg            config.IConfig
 	generalUsecase generalUsecases.IGeneralUsecase
 	filesUsecase   filesUsecases.IFilesUsecase
+	db             *sql.DB
 }
 
-func GeneralHandler(cfg config.IConfig, generalUsecase generalUsecases.IGeneralUsecase, filesUsecase filesUsecases.IFilesUsecase) IGeneralHandler {
+func GeneralHandler(cfg config.IConfig, generalUsecase generalUsecases.IGeneralUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IGeneralHandler {
 	return &generalHandler{
 		cfg:            cfg,
 		generalUsecase: generalUsecase,
 		filesUsecase:   filesUsecase,
+		db:             db,
 	}
 }
 
@@ -62,11 +67,11 @@ func (h *generalHandler) UpdateGeneral(c *fiber.Ctx) error {
 			"Invalid job ID",
 		).Res()
 	}
-	
+
 	req := &general.General{
 		Images: make([]*entities.Image, 0),
 	}
-	
+
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,
@@ -85,5 +90,18 @@ func (h *generalHandler) UpdateGeneral(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "อัพเดตข้อมูลเว็บไซต์")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, job).Res()
 }

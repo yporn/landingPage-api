@@ -75,6 +75,7 @@ func (r *promotionsRepository) FindOnePromotion(promotionId string) (*promotions
 								SELECT
 									"hm"."id",
 									"hm"."name",
+									"hm"."project_id",
 									(
 										SELECT
 											COALESCE(array_to_json(array_agg("hmt")), '[]'::json)
@@ -86,7 +87,17 @@ func (r *promotionsRepository) FindOnePromotion(promotionId string) (*promotions
 											FROM "house_model_type_items" "hmt"
 											WHERE "hmt"."house_model_id" = "hm"."id"
 										) AS "hmt"
-									) AS "house_type"
+									) AS "house_type",
+									(
+										SELECT
+											COALESCE(array_to_json(array_agg("hmi")), '[]'::json)
+										FROM (
+											SELECT
+												"hmi".*
+											FROM "house_model_images" "hmi"
+											WHERE "hmi"."house_model_id" = "hm"."id"
+										) AS "hmi"
+									) AS "house_images"
 								FROM "house_models" "hm"
 								WHERE "hm"."id" = "phm"."house_model_id"
 							) AS "hm"

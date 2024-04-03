@@ -1,6 +1,7 @@
 package bannersHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type bannersHandlersErrCode string
@@ -29,20 +31,22 @@ type IBannersHandler interface {
 	FindBanner(c *fiber.Ctx) error
 	AddBanner(c *fiber.Ctx) error
 	UpdateBanner(c *fiber.Ctx) error
-	DeleteBanner(c *fiber.Ctx) error 
+	DeleteBanner(c *fiber.Ctx) error
 }
 
 type bannersHandler struct {
-	cfg             config.IConfig
+	cfg            config.IConfig
 	bannersUsecase bannersUsecases.IBannersUsecase
-	filesUsecase    filesUsecases.IFilesUsecase
+	filesUsecase   filesUsecases.IFilesUsecase
+	db             *sql.DB
 }
 
-func BannersHandler(cfg config.IConfig, bannersUsecase bannersUsecases.IBannersUsecase, filesUsecase filesUsecases.IFilesUsecase) IBannersHandler {
+func BannersHandler(cfg config.IConfig, bannersUsecase bannersUsecases.IBannersUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IBannersHandler {
 	return &bannersHandler{
-		cfg:             cfg,
+		cfg:            cfg,
 		bannersUsecase: bannersUsecase,
-		filesUsecase:    filesUsecase,
+		filesUsecase:   filesUsecase,
+		db:             db,
 	}
 }
 
@@ -94,7 +98,7 @@ func (h *bannersHandler) FindBanner(c *fiber.Ctx) error {
 
 func (h *bannersHandler) AddBanner(c *fiber.Ctx) error {
 	req := &banners.Banner{
-		Images:   make([]*entities.Image, 0),
+		Images: make([]*entities.Image, 0),
 	}
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
@@ -112,22 +116,35 @@ func (h *bannersHandler) AddBanner(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลแบนเนอร์")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, banner).Res()
 }
 
 func (h *bannersHandler) UpdateBanner(c *fiber.Ctx) error {
 	bannerIdStr := strings.Trim(c.Params("banner_id"), " ")
-    bannerId, err := strconv.Atoi(bannerIdStr)
+	bannerId, err := strconv.Atoi(bannerIdStr)
 	if err != nil {
-        return entities.NewResponse(c).Error(
-            fiber.ErrBadRequest.Code,
-            string(updateBannerErr),
-            err.Error(),
-        ).Res()
-    }
-	
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updateBannerErr),
+			err.Error(),
+		).Res()
+	}
+
 	req := &banners.Banner{
-		Images:   make([]*entities.Image, 0),
+		Images: make([]*entities.Image, 0),
 	}
 
 	if err := c.BodyParser(req); err != nil {
@@ -147,6 +164,19 @@ func (h *bannersHandler) UpdateBanner(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลแบนเนอร์")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, banner).Res()
 }
 
@@ -181,6 +211,18 @@ func (h *bannersHandler) DeleteBanner(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deleteBannerErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลแบนเนอร์")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}

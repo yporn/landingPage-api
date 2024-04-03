@@ -120,7 +120,7 @@ func (h *activitiesHandler) AddActivity(c *fiber.Ctx) error {
 
 	userID := utils.GetUserIDFromContext(c)
 	// Log activity
-	err = utils.LogActivity(h.db, strconv.Itoa(userID), "AddActivity", "Activity added: "+strconv.Itoa(activity.Id))
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลกิจกรรม")
 	if err != nil {
 		// Handle error if logging fails
 		return entities.NewResponse(c).Error(
@@ -164,6 +164,18 @@ func (h *activitiesHandler) UpdateActivity(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	userID := utils.GetUserIDFromContext(c)
+	// Log activity
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลกิจกรรม : "+activity.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v",userID),
+			err.Error(),
+		).Res()
+	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, activity).Res()
 }
 
@@ -198,6 +210,18 @@ func (h *activitiesHandler) DeleteActivity(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deleteActivityErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลกิจกรรม : "+activity.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v",userID),
 			err.Error(),
 		).Res()
 	}

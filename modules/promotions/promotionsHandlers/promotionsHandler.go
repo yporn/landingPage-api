@@ -1,6 +1,7 @@
 package promotionsHandlers
 
 import (
+	"database/sql"
 	"fmt"
 	"path"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/promotions"
 	"github.com/yporn/sirarom-backend/modules/promotions/promotionsUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type promotionsHandlersErrCode string
@@ -27,23 +29,25 @@ const (
 
 type IPromotionsHandler interface {
 	FindOnePromotion(c *fiber.Ctx) error
-	FindPromotion(c *fiber.Ctx) error 
+	FindPromotion(c *fiber.Ctx) error
 	AddPromotion(c *fiber.Ctx) error
 	UpdatePromotion(c *fiber.Ctx) error
-	DeletePromotion(c *fiber.Ctx) error 
+	DeletePromotion(c *fiber.Ctx) error
 }
 
 type promotionsHandlers struct {
 	cfg               config.IConfig
 	promotionsUsecase promotionsUsecases.IPromotionsUsecase
 	filesUsecase      filesUsecases.IFilesUsecase
+	db                *sql.DB
 }
 
-func PromotionsHandler(cfg config.IConfig, promotionsUsecase promotionsUsecases.IPromotionsUsecase, filesUsecase filesUsecases.IFilesUsecase) IPromotionsHandler {
+func PromotionsHandler(cfg config.IConfig, promotionsUsecase promotionsUsecases.IPromotionsUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IPromotionsHandler {
 	return &promotionsHandlers{
-		cfg: cfg,
+		cfg:               cfg,
 		promotionsUsecase: promotionsUsecase,
-		filesUsecase: filesUsecase,
+		filesUsecase:      filesUsecase,
+		db:                db,
 	}
 }
 
@@ -96,7 +100,7 @@ func (h *promotionsHandlers) FindPromotion(c *fiber.Ctx) error {
 func (h *promotionsHandlers) AddPromotion(c *fiber.Ctx) error {
 	req := &promotions.Promotion{
 		HouseModel: make([]*promotions.PromotionHouseModel, 0),
-		Images:   make([]*entities.Image, 0),
+		Images:     make([]*entities.Image, 0),
 	}
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
@@ -122,20 +126,33 @@ func (h *promotionsHandlers) AddPromotion(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลโปรโมชัน : "+promotion.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusCreated, promotion).Res()
 }
 
 func (h *promotionsHandlers) UpdatePromotion(c *fiber.Ctx) error {
 	promotionIdStr := strings.Trim(c.Params("promotion_id"), " ")
-    promotionId, err := strconv.Atoi(promotionIdStr)
+	promotionId, err := strconv.Atoi(promotionIdStr)
 	if err != nil {
-        return entities.NewResponse(c).Error(
-            fiber.ErrBadRequest.Code,
-            string(updatePromotionErr),
-            err.Error(),
-        ).Res()
-    }
-	
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updatePromotionErr),
+			err.Error(),
+		).Res()
+	}
+
 	req := &promotions.Promotion{
 		// HouseModel: make([]*promotions.PromotionHouseModel, 0),
 		FreeItem: make([]*promotions.PromotionFreeItem, 0),
@@ -159,6 +176,19 @@ func (h *promotionsHandlers) UpdatePromotion(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลโปรโมชัน : "+promotion.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
+
 	return entities.NewResponse(c).Success(fiber.StatusOK, promotion).Res()
 }
 
@@ -193,6 +223,18 @@ func (h *promotionsHandlers) DeletePromotion(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deletePromotionErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลโปรโมชัน : "+promotion.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}
