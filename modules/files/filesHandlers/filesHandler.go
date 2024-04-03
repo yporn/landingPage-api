@@ -156,6 +156,7 @@ func (h *filesHandler) DeleteFile(c *fiber.Ctx) error {
 }
 
 func convertToWebP(inputPath, outputPath string) error {
+	//open file
 	inputFile, err := os.Open(inputPath)
 	if err != nil {
 		return err
