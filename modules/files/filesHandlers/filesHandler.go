@@ -80,7 +80,7 @@ func (h *filesHandler) UploadFiles(c *fiber.Ctx) error {
 			return entities.NewResponse(c).Error(
 				fiber.ErrBadRequest.Code,
 				string(uploadErr),
-				fmt.Sprintf("file size must less than %d MiB", int(math.Ceil(float64(h.cfg.App().FileLimit())/math.Pow(1024, 2)))),
+				fmt.Sprintf("file size must less than %d MiB", int(math.Ceil(float64(h.cfg.App().FileLimit())/math.Pow(1024, 10)))),
 			).Res()
 		}
 
@@ -188,7 +188,8 @@ func convertToWebP(file *multipart.FileHeader, outputPath string) error {
 	if err != nil {
 		return err
 	}
-
+	defer outputFile.Close()
+	
 	// Delete the directory after encoding the file to WebP
 	if err := os.RemoveAll("./assets/images/convert/"); err != nil {
 		return err

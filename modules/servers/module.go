@@ -101,7 +101,9 @@ func (m *moduleFactory) UserModule() {
 	router.Get("/:user_id", handler.FindOneUser)
 	router.Get("/", handler.FindUser)
 	router.Post("/signup", m.mid.JwtAuth(), handler.SignUp)
-	router.Post("/signin", handler.SignIn)
+	router.Post("/signin", func(c *fiber.Ctx) error {
+		return handler.SignIn(c, db)
+	})
 	router.Post("/refresh", m.mid.JwtAuth(), handler.RefreshPassport)
 	router.Post("/signout", handler.SignOut)
 	router.Patch("/update/:user_id", m.mid.JwtAuth(), m.mid.Authorize(1), handler.UpdateUser)
@@ -245,13 +247,13 @@ func (m *moduleFactory) LogoModule() {
 	usecase := logosUsecases.LogosUsecase(repository)
 	handler := logosHandlers.LogosHandler(m.s.cfg, usecase, m.FilesModule().Usecase(), db)
 
-	router := m.r.Group("/logos")
+	router := m.r.Group("/brands")
 
 	router.Get("/", handler.FindLogo)
-	router.Get("/:logo_id", handler.FindOneLogo)
+	router.Get("/:brand_id", handler.FindOneLogo)
 	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.AddLogo)
-	router.Patch("/update/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateLogo)
-	router.Delete("/:logo_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.DeleteLogo)
+	router.Patch("/update/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateLogo)
+	router.Delete("/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.DeleteLogo)
 }
 
 func (m *moduleFactory) ActivityLogModule() {

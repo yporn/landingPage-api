@@ -28,7 +28,8 @@ func (r *activityLogsRepository) FindActivityLog() ([]activityLogs.ActivityLog, 
 		"a"."user_id",
 		"u"."name",
 		"a"."action",
-		"a"."details"
+		"a"."details",
+        "a"."created_at"
 		FROM "activity_logs" "a"
 		LEFT JOIN "users" AS "u" ON "a"."user_id" = "u"."id"
     `
@@ -43,7 +44,7 @@ func (r *activityLogsRepository) FindActivityLog() ([]activityLogs.ActivityLog, 
         var activityLog activityLogs.ActivityLog
         // Initialize the User field before scanning into it
         activityLog.User = &activityLogs.User{}
-        if err := rows.Scan(&activityLog.Id, &activityLog.User.Id, &activityLog.User.Name, &activityLog.Action, &activityLog.Detail); err != nil {
+        if err := rows.Scan(&activityLog.Id, &activityLog.User.Id, &activityLog.User.Name, &activityLog.Action, &activityLog.Detail, &activityLog.CreatedAt); err != nil {
             return nil, fmt.Errorf("scan activity log failed: %v", err)
         }
         activityLogData = append(activityLogData, activityLog)

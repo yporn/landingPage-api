@@ -119,7 +119,7 @@ func (b *findLogoBuilder) whereQuery() {
 func (b *findLogoBuilder) sort() {
 	orderByMap := map[string]string{
 		"id":         "\"id\"",
-		"name":   "\"name\"",
+		"name":       "\"name\"",
 		"created_at": "\"created_at\"",
 	}
 
@@ -221,4 +221,3 @@ func (en *findLogoEngineer) CountLogo() IFindLogoBuilder {
 	en.builder.whereQuery()
 	return en.builder
 }
-

@@ -36,7 +36,7 @@ type IUsersHandler interface {
 	FindOneUser(c *fiber.Ctx) error
 	FindUser(c *fiber.Ctx) error
 	SignUp(c *fiber.Ctx) error
-	SignIn(c *fiber.Ctx) error
+	SignIn(c *fiber.Ctx, db *sql.DB) error
 	RefreshPassport(c *fiber.Ctx) error
 	SignOut(c *fiber.Ctx) error
 	GenerateAdminToken(c *fiber.Ctx) error
@@ -169,7 +169,7 @@ func (h *usersHandler) SignUp(c *fiber.Ctx) error {
 	return entities.NewResponse(c).Success(fiber.StatusCreated, result).Res()
 }
 
-func (h *usersHandler) SignIn(c *fiber.Ctx) error {
+func (h *usersHandler) SignIn(c *fiber.Ctx, db *sql.DB) error {
 	req := new(users.UserCredential)
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
@@ -189,16 +189,35 @@ func (h *usersHandler) SignIn(c *fiber.Ctx) error {
 	}
 
 	// // Log activity
-	// userID := utils.GetUserIDFromContext(c)
-	// err = utils.LogActivity(h.db, strconv.Itoa(userID), "login", "เข้าสู่ระบบ")
-	// if err != nil {
-	// 	// Handle error if logging fails
-	// 	return entities.NewResponse(c).Error(
-	// 		fiber.ErrInternalServerError.Code,
-	// 		fmt.Sprintf("Failed to log activity %v", userID),
-	// 		err.Error(),
-	// 	).Res()
-	// }
+	userID, err := utils.GetUserIDByEmail(db, req.Email)
+	fmt.Println("user id : ", userID)
+	if err != nil {
+		// Handle error if retrieving user ID fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to get user ID for email %s", req.Email),
+			err.Error(),
+		).Res()
+	}
+
+	// Check if the retrieved user ID is 0 (indicating user doesn't exist)
+	if userID == 0 {
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			fmt.Sprintf("User with email %s doesn't exist", req.Email),
+			"User not found",
+		).Res()
+	}
+
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "login", "เข้าสู่ระบบ")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
 
 	return entities.NewResponse(c).Success(fiber.StatusOK, passport).Res()
 }

@@ -41,3 +41,23 @@ func GetUserIDFromContext(c *fiber.Ctx) int {
 
     return userID
 }
+
+func GetUserIDByEmail(db *sql.DB, email string) (int, error) {
+    var userID int
+
+    // Prepare the SQL query
+    query := "SELECT id FROM users WHERE email = $1"
+
+    // Execute the query
+    err := db.QueryRow(query, email).Scan(&userID)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            // Handle case when no user with the given email is found
+            return 0, fmt.Errorf("no user found with email %s", email)
+        }
+        // Handle other errors
+        return 0, fmt.Errorf("failed to query user ID: %v", err)
+    }
+
+    return userID, nil
+}

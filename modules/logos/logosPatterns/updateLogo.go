@@ -164,7 +164,7 @@ func (b *updateLogoBuilder) deleteOldImages() error {
 		deleteFileReq := make([]*files.DeleteFileReq, 0)
 		for _, img := range images {
 			deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-				Destination: fmt.Sprintf("images/logos/%s", path.Base(img.Url)),
+				Destination: fmt.Sprintf("images/brands/%s", path.Base(img.Url)),
 			})
 		}
 		b.filesUsecases.DeleteFileOnStorage(deleteFileReq)

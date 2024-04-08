@@ -52,7 +52,7 @@ func LogosHandler(cfg config.IConfig, logosUsecase logosUsecases.ILogosUsecase, 
 }
 
 func (h *logosHandler) FindOneLogo(c *fiber.Ctx) error {
-	logoId := strings.Trim(c.Params("logo_id"), " ")
+	logoId := strings.Trim(c.Params("brand_id"), " ")
 
 	logo, err := h.logosUsecase.FindOneLogo(logoId)
 	if err != nil {
@@ -134,7 +134,7 @@ func (h *logosHandler) AddLogo(c *fiber.Ctx) error {
 }
 
 func (h *logosHandler) UpdateLogo(c *fiber.Ctx) error {
-	logoIdStr := strings.Trim(c.Params("logo_id"), " ")
+	logoIdStr := strings.Trim(c.Params("brand_id"), " ")
 	logoId, err := strconv.Atoi(logoIdStr)
 	if err != nil {
 		return entities.NewResponse(c).Error(
@@ -182,7 +182,7 @@ func (h *logosHandler) UpdateLogo(c *fiber.Ctx) error {
 }
 
 func (h *logosHandler) DeleteLogo(c *fiber.Ctx) error {
-	logoId := strings.Trim(c.Params("logo_id"), " ")
+	logoId := strings.Trim(c.Params("brand_id"), " ")
 
 	logo, err := h.logosUsecase.FindOneLogo(logoId)
 	if err != nil {
@@ -196,7 +196,7 @@ func (h *logosHandler) DeleteLogo(c *fiber.Ctx) error {
 	deleteFileReq := make([]*files.DeleteFileReq, 0)
 	for _, p := range logo.Images {
 		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-			Destination: fmt.Sprintf("logos/%s", path.Base(p.Url)),
+			Destination: fmt.Sprintf("brands/%s", path.Base(p.Url)),
 		})
 	}
 
