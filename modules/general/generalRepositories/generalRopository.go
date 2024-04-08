@@ -17,21 +17,19 @@ type IGeneralRepository interface {
 	UpdateGeneral(req *general.General) (*general.General, error)
 }
 
-
 type generalRepository struct {
-	db  *sqlx.DB
-	cfg config.IConfig
+	db           *sqlx.DB
+	cfg          config.IConfig
 	filesUsecase filesUsecases.IFilesUsecase
 }
 
 func GeneralRepository(db *sqlx.DB, cfg config.IConfig, filesUsecase filesUsecases.IFilesUsecase) IGeneralRepository {
 	return &generalRepository{
-		db:  db,
-		cfg: cfg,
+		db:           db,
+		cfg:          cfg,
 		filesUsecase: filesUsecase,
 	}
 }
-
 
 func (r *generalRepository) FindOneGeneral(generalId string) (*general.General, error) {
 	query := `
@@ -39,16 +37,27 @@ func (r *generalRepository) FindOneGeneral(generalId string) (*general.General, 
 		to_jsonb("t")
 	FROM (
 		SELECT
-		*
-		FROM "data_settings"  
-		WHERE "id" = $1
+			"d".*,
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("it")), '[]'::json)
+				FROM (
+					SELECT
+						"i"."id",
+						"i"."filename",
+						"i"."url"
+					FROM "data_setting_images" "i"
+					WHERE "i"."data_setting_id" = "d"."id"
+				) AS "it"
+			) AS "images"
+		FROM "data_settings" "d"
+		WHERE "d"."id" = $1
 		LIMIT 1
 	) AS "t";`
 
 	generalBytes := make([]byte, 0)
 	general := &general.General{}
 
-	
 	if err := r.db.Get(&generalBytes, query, generalId); err != nil {
 		return nil, fmt.Errorf("get general failed: %v", err)
 	}
@@ -67,7 +76,7 @@ func (r *generalRepository) UpdateGeneral(req *general.General) (*general.Genera
 	}
 
 	generalId := strconv.Itoa(req.Id)
-	
+
 	general, err := r.FindOneGeneral(generalId)
 	if err != nil {
 		return nil, err

@@ -129,28 +129,15 @@ func (b *updateGeneralBuilder) updateQuery() {
 		setStatements = append(setStatements, fmt.Sprintf(`"link_website" = $%d`, b.lastStackIndex))
 	}
 
-	if b.req.FileName != "" {
-		b.values = append(b.values, b.req.FileName)
-		b.lastStackIndex = len(b.values)
-
-		setStatements = append(setStatements, fmt.Sprintf(`"filename" = $%d`, b.lastStackIndex))
-	}
-
-	if b.req.Url != "" {
-		b.values = append(b.values, b.req.Url)
-		b.lastStackIndex = len(b.values)
-
-		setStatements = append(setStatements, fmt.Sprintf(`"url" = $%d`, b.lastStackIndex))
-	}
-	
 	b.query += strings.Join(setStatements, ", ")
 }
 
 func (b *updateGeneralBuilder) insertImages() error {
 	query := `
-	UPDATE "data_settings" SET (
+	INSERT INTO "data_setting_images" (
 		"filename",
 		"url",
+		"data_setting_id"
 	)
 	VALUES`
 
@@ -190,8 +177,8 @@ func (b *updateGeneralBuilder) getOldImages() []*entities.Image {
 		"id",
 		"filename",
 		"url"
-	FROM "data_settings"
-	WHERE "id" = "1";`
+	FROM "data_setting_images"
+	WHERE "data_setting_id" = $1;`
 
 	images := make([]*entities.Image, 0)
 	if err := b.db.Select(
@@ -206,8 +193,8 @@ func (b *updateGeneralBuilder) getOldImages() []*entities.Image {
 
 func (b *updateGeneralBuilder) deleteOldImages() error {
 	query := `
-	DELETE FROM "data_settings"
-	WHERE "id" = "1";`
+	DELETE FROM "data_setting_images"
+	WHERE "data_setting_id" = $1;`
 
 	images := b.getOldImages()
 	if len(images) > 0 {
