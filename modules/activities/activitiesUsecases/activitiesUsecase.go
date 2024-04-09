@@ -62,7 +62,6 @@ func (u *activitiesUsecase) UpdateActivity(req *activities.Activity) (*activitie
 	return activity, nil
 }
 
-
 func (u *activitiesUsecase) DeleteActivity(activityId string) error {
 	if err := u.activitiesRepository.DeleteActivity(activityId); err != nil {
 		return err

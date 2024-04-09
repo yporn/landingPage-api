@@ -176,7 +176,7 @@ func (b *findActivityBuilder) Result() []*activities.Activity {
 	}
 
 	if err := json.Unmarshal(bytes, &activitiesData); err != nil {
-		log.Printf("unmarshal banners failed: %v\n", err)
+		log.Printf("unmarshal activities failed: %v\n", err)
 		return make([]*activities.Activity, 0)
 	}
 	b.resetQuery()

@@ -89,7 +89,7 @@ func (b *findProjectBuilder) initQuery() {
 				FROM (
 					SELECT
 						"ci".*
-					FROM "project_comfortable_items" "ci"
+					FROM "project_facility_items" "ci"
 					WHERE "ci"."project_id" = "p"."id"
 					
 				) AS "cit"
@@ -130,9 +130,9 @@ func (b *findProjectBuilder) buildWhereSearch() {
 
 		query := fmt.Sprintf(`
 		AND (
-			LOWER("o"."name") LIKE $%d OR
-			LOWER("o"."type_project") LIKE $%d OR
-			LOWER("o"."location") LIKE $%d
+			LOWER("p"."name") LIKE $%d OR
+			LOWER(CAST("p"."type_project" AS TEXT)) LIKE $%d OR
+			LOWER("p"."location") LIKE $%d
 		)`,
 			b.lastIndex+1,
 			b.lastIndex+2,

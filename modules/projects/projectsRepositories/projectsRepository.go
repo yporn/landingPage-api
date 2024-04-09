@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/yporn/sirarom-backend/config"
@@ -17,7 +18,9 @@ type IProjectRepository interface {
 	FindOneProject(projectId string) (*projects.Project, error)
 	FindProject(req *projects.ProjectFilter) ([]*projects.Project, int)
 	InsertProject(req *projects.Project) (*projects.Project, error)
+	UpdateProject(req *projects.Project) (*projects.Project, error)
 	DeleteProject(projectId string) error
+	FindProjectHouseModel(projectID string) (*projects.Project, error)
 }
 
 type projectsRepository struct {
@@ -69,7 +72,7 @@ func (r *projectsRepository) FindOneProject(projectId string) (*projects.Project
 				FROM (
 					SELECT
 						"ci".*
-					FROM "project_comfortable_items" "ci"
+					FROM "project_facility_items" "ci"
 					WHERE "ci"."project_id" = "p"."id"
 					
 				) AS "cit"
@@ -85,17 +88,138 @@ func (r *projectsRepository) FindOneProject(projectId string) (*projects.Project
 					FROM "project_images" "i"
 					WHERE "i"."project_id" = "p"."id"
 				) AS "it"
-			) AS "images"
+			) AS "images",
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("hm")), '[]'::json)
+				FROM (
+					SELECT
+						"hm".*,
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("hmti")), '[]'::json)
+							FROM (
+								SELECT
+									"hmti".*
+								FROM "house_model_type_items" "hmti"
+								WHERE "hmti"."house_model_id" = "hm"."id"
+							) AS "hmti"
+						) AS "type_items",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ihm")), '[]'::json)
+							FROM (
+								SELECT
+									"ihm".*
+								FROM "house_model_images" "ihm"
+								WHERE "ihm"."house_model_id" = "hm"."id"
+							) AS "ihm"
+						) AS "house_images"
+					FROM "house_models" "hm"
+					WHERE "hm"."project_id" = "p"."id"
+				) AS "hm"
+			) AS "house_models"
 			FROM "projects" "p"
 		WHERE "p"."id" = $1
 	) AS "t";
 	`
 	projectBytes := make([]byte, 0)
 	project := &projects.Project{
-		Images:          make([]*entities.Image, 0),
-		HouseTypeItem:   make([]*projects.ProjectHouseTypeItem, 0),
-		DescAreaItem:    make([]*projects.ProjectDescAreaItem, 0),
-		ComfortableItem: make([]*projects.ProjectComfortableItem, 0),
+		Images:        make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
+	}
+
+	if err := r.db.Get(&projectBytes, query, projectId); err != nil {
+		return nil, fmt.Errorf("get project failed: %v", err)
+	}
+	if err := json.Unmarshal(projectBytes, &project); err != nil {
+		return nil, fmt.Errorf("unmarshal project failed: %v", err)
+	}
+	return project, nil
+}
+
+func (r *projectsRepository) FindProjectHouseModel(projectId string) (*projects.Project, error) {
+	query := `
+	SELECT
+		to_jsonb("t")
+	FROM (
+		SELECT
+			"p".*,
+			(
+				SELECT
+					COALESCE(array_to_json(array_agg("hm")), '[]'::json)
+				FROM (
+					SELECT
+						"hm".*,
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("hmti")), '[]'::json)
+							FROM (
+								SELECT
+									"hmti".*
+								FROM "house_model_type_items" "hmti"
+								WHERE "hmti"."house_model_id" = "hm"."id"
+								AND ("hmti"."room_type" = 'ห้องนอน' OR "hmti"."room_type" = 'ห้องน้ำ' OR "hmti"."room_type" = 'ที่จอดรถ')
+							) AS "hmti"
+						) AS "type_items",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ihm")), '[]'::json)
+							FROM (
+								SELECT
+									"ihm".*
+								FROM "house_model_images" "ihm"
+								WHERE "ihm"."house_model_id" = "hm"."id"
+							) AS "ihm"
+						) AS "house_images",
+						(
+							SELECT
+								COALESCE(array_to_json(array_agg("ptm")), '[]'::json)
+							FROM (
+								SELECT
+									"ptm"."id",
+									"ptm"."house_model_id",
+									"ptm"."promotion_id",
+									(
+										SELECT
+											COALESCE(array_to_json(array_agg("pt")), '[]'::json)
+										FROM (
+											SELECT
+												"pt".*,
+												(
+													SELECT
+														COALESCE(array_to_json(array_agg("ptf")), '[]'::json)
+													FROM (
+														SELECT
+															"ptf".*
+														FROM "promotion_free_items" "ptf"
+														WHERE  "pt"."id" = "ptf"."promotion_id"
+													) AS "ptf"
+												) AS "free_items"
+											FROM "promotions" "pt"
+											WHERE  "ptm"."promotion_id" = "pt"."id"
+										) AS "pt"
+									) AS "promotions"
+								FROM "promotion_house_models" "ptm"
+								WHERE "ptm"."house_model_id" = "hm"."id"
+							) AS "ptm"
+						) AS "houseModel_promotions"
+					FROM "house_models" "hm"
+					WHERE "hm"."project_id" = "p"."id"
+				) AS "hm"
+			) AS "house_models"
+			FROM "projects" "p"
+		WHERE "p"."id" = $1
+	) AS "t";
+	`
+	projectBytes := make([]byte, 0)
+	project := &projects.Project{
+		Images:        make([]*entities.Image, 0),
+		HouseTypeItem: make([]*projects.ProjectHouseTypeItem, 0),
+		DescAreaItem:  make([]*projects.ProjectDescAreaItem, 0),
+		FacilityItem:  make([]*projects.ProjectFacilityItem, 0),
 	}
 
 	if err := r.db.Get(&projectBytes, query, projectId); err != nil {
@@ -121,6 +245,21 @@ func (r *projectsRepository) InsertProject(req *projects.Project) (*projects.Pro
 	}
 
 	project, err := r.FindOneProject(projectId)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+func (r *projectsRepository) UpdateProject(req *projects.Project) (*projects.Project, error) {
+	builder := projectsPatterns.UpdateProjectBuilder(r.db, req, r.filesUsecase)
+	engineer := projectsPatterns.UpdateProjectEngineer(builder)
+
+	if err := engineer.UpdateProject(); err != nil {
+		return nil, err
+	}
+
+	project, err := r.FindOneProject(strconv.Itoa(req.Id))
 	if err != nil {
 		return nil, err
 	}

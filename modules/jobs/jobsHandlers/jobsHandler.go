@@ -1,6 +1,8 @@
 package jobsHandlers
 
 import (
+	"database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/jobs"
 	"github.com/yporn/sirarom-backend/modules/jobs/jobsUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type jobsHandlersErrCode string
@@ -32,12 +35,14 @@ type IJobsHandler interface {
 type jobsHandler struct {
 	cfg         config.IConfig
 	jobsUsecase jobsUsecases.IJobsUsecase
+	db          *sql.DB
 }
 
-func JobsHandler(cfg config.IConfig, jobsUsecase jobsUsecases.IJobsUsecase) IJobsHandler {
+func JobsHandler(cfg config.IConfig, jobsUsecase jobsUsecases.IJobsUsecase, db *sql.DB) IJobsHandler {
 	return &jobsHandler{
 		cfg:         cfg,
 		jobsUsecase: jobsUsecase,
+		db:          db,
 	}
 }
 
@@ -80,7 +85,7 @@ func (h *jobsHandler) FindJob(c *fiber.Ctx) error {
 	if req.OrderBy == "" {
 		req.OrderBy = "created_at"
 	}
-	
+
 	if req.Sort == "" {
 		req.Sort = "asc"
 	}
@@ -104,6 +109,18 @@ func (h *jobsHandler) AddJob(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(insertJobErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลตำแหน่งงาน : "+job.Position)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}
@@ -141,12 +158,24 @@ func (h *jobsHandler) UpdateJob(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลตำแหน่งงาน : "+job.Position)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
+			err.Error(),
+		).Res()
+	}
 	return entities.NewResponse(c).Success(fiber.StatusOK, job).Res()
 }
 
 func (h *jobsHandler) DeleteJob(c *fiber.Ctx) error {
 	jobId := strings.Trim(c.Params("job_id"), " ")
-	_, err := h.jobsUsecase.FindOneJob(jobId)
+	job, err := h.jobsUsecase.FindOneJob(jobId)
 	if err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
@@ -159,6 +188,18 @@ func (h *jobsHandler) DeleteJob(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deleteJobErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลตำแหน่งงาน : "+job.Position)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v", userID),
 			err.Error(),
 		).Res()
 	}

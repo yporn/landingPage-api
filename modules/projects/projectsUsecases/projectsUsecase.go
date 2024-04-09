@@ -12,7 +12,9 @@ type IProjectsUsecase interface {
 	FindOneProject(projectId string) (*projects.Project, error)
 	FindProject(req *projects.ProjectFilter) *entities.PaginateRes
 	AddProject(req *projects.Project) (*projects.Project, error)
+	UpdateProject(req *projects.Project) (*projects.Project, error)
 	DeleteProject(projectId string) error
+	FindProjectHouseModel(projectID string) (*projects.Project, error)
 }
 
 type projectsUsecase struct {
@@ -33,6 +35,13 @@ func (u *projectsUsecase) FindOneProject(projectId string) (*projects.Project, e
 	return project, nil
 }
 
+func (u *projectsUsecase) FindProjectHouseModel(projectId string) (*projects.Project, error) {
+	project, err := u.projectsRepository.FindProjectHouseModel(projectId)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
+}
 
 func (u *projectsUsecase) AddProject(req *projects.Project) (*projects.Project, error) {
 	project, err := u.projectsRepository.InsertProject(req)
@@ -51,6 +60,14 @@ func (u *projectsUsecase) FindProject(req *projects.ProjectFilter) *entities.Pag
 		TotalItem: count,
 		TotalPage: int(math.Ceil(float64(count) / float64(req.Limit))),
 	}
+}
+
+func (u *projectsUsecase) UpdateProject(req *projects.Project) (*projects.Project, error) {
+	project, err := u.projectsRepository.UpdateProject(req)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
 }
 
 func (u *projectsUsecase) DeleteProject(projectId string) error {

@@ -1,7 +1,9 @@
 package activitiesHandlers
 
 import (
+	"database/sql"
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/entities"
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
+	"github.com/yporn/sirarom-backend/pkg/utils"
 )
 
 type activitiesHandlersErrCode string
@@ -29,20 +32,22 @@ type IActivitiesHandler interface {
 	FindActivity(c *fiber.Ctx) error
 	AddActivity(c *fiber.Ctx) error
 	UpdateActivity(c *fiber.Ctx) error
-	DeleteActivity(c *fiber.Ctx) error 
+	DeleteActivity(c *fiber.Ctx) error
 }
 
 type activitiesHandler struct {
-	cfg             config.IConfig
+	cfg               config.IConfig
 	activitiesUsecase activitiesUsecases.IActivitiesUsecase
-	filesUsecase    filesUsecases.IFilesUsecase
+	filesUsecase      filesUsecases.IFilesUsecase
+	db                *sql.DB
 }
 
-func ActivitiesHandler(cfg config.IConfig, activitiesUsecase activitiesUsecases.IActivitiesUsecase, filesUsecase filesUsecases.IFilesUsecase) IActivitiesHandler {
+func ActivitiesHandler(cfg config.IConfig, activitiesUsecase activitiesUsecases.IActivitiesUsecase, filesUsecase filesUsecases.IFilesUsecase, db *sql.DB) IActivitiesHandler {
 	return &activitiesHandler{
-		cfg:             cfg,
+		cfg:               cfg,
 		activitiesUsecase: activitiesUsecase,
-		filesUsecase:    filesUsecase,
+		filesUsecase:      filesUsecase,
+		db:                db,
 	}
 }
 
@@ -78,7 +83,7 @@ func (h *activitiesHandler) FindActivity(c *fiber.Ctx) error {
 		req.Page = 1
 	}
 	if req.Limit < 5 {
-		req.Limit = 100000
+		req.Limit = 1000000
 	}
 
 	if req.OrderBy == "" {
@@ -94,7 +99,7 @@ func (h *activitiesHandler) FindActivity(c *fiber.Ctx) error {
 
 func (h *activitiesHandler) AddActivity(c *fiber.Ctx) error {
 	req := &activities.Activity{
-		Images:   make([]*entities.Image, 0),
+		Images: make([]*entities.Image, 0),
 	}
 	if err := c.BodyParser(req); err != nil {
 		return entities.NewResponse(c).Error(
@@ -112,22 +117,34 @@ func (h *activitiesHandler) AddActivity(c *fiber.Ctx) error {
 			err.Error(),
 		).Res()
 	}
+
+	userID := utils.GetUserIDFromContext(c)
+	// Log activity
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "created", "เพิ่มข้อมูลกิจกรรม")
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v",userID),
+			err.Error(),
+		).Res()
+	}
 	return entities.NewResponse(c).Success(fiber.StatusCreated, activity).Res()
 }
 
 func (h *activitiesHandler) UpdateActivity(c *fiber.Ctx) error {
 	activityIdStr := strings.Trim(c.Params("activity_id"), " ")
-    activityId, err := strconv.Atoi(activityIdStr)
+	activityId, err := strconv.Atoi(activityIdStr)
 	if err != nil {
-        return entities.NewResponse(c).Error(
-            fiber.ErrBadRequest.Code,
-            string(updateActivityErr),
-            err.Error(),
-        ).Res()
-    }
-	
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(updateActivityErr),
+			err.Error(),
+		).Res()
+	}
+
 	req := &activities.Activity{
-		Images:   make([]*entities.Image, 0),
+		Images: make([]*entities.Image, 0),
 	}
 
 	if err := c.BodyParser(req); err != nil {
@@ -144,6 +161,18 @@ func (h *activitiesHandler) UpdateActivity(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(updateActivityErr),
+			err.Error(),
+		).Res()
+	}
+
+	userID := utils.GetUserIDFromContext(c)
+	// Log activity
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "updated", "แก้ไขข้อมูลกิจกรรม : "+activity.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v",userID),
 			err.Error(),
 		).Res()
 	}
@@ -165,7 +194,7 @@ func (h *activitiesHandler) DeleteActivity(c *fiber.Ctx) error {
 	deleteFileReq := make([]*files.DeleteFileReq, 0)
 	for _, p := range activity.Images {
 		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-			Destination: fmt.Sprintf("activity/%s", p.FileName),
+			Destination: fmt.Sprintf("activities/%s", path.Base(p.Url)),
 		})
 	}
 
@@ -181,6 +210,18 @@ func (h *activitiesHandler) DeleteActivity(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
 			string(deleteActivityErr),
+			err.Error(),
+		).Res()
+	}
+
+	// Log activity
+	userID := utils.GetUserIDFromContext(c)
+	err = utils.LogActivity(h.db, strconv.Itoa(userID), "deleted", "ลบข้อมูลกิจกรรม : "+activity.Heading)
+	if err != nil {
+		// Handle error if logging fails
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			fmt.Sprintf("Failed to log activity %v",userID),
 			err.Error(),
 		).Res()
 	}

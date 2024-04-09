@@ -3,6 +3,7 @@ package activitiesPatterns
 import (
 	"context"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -191,7 +192,7 @@ func (b *updateActivityBuilder) deleteOldImages() error {
 		deleteFileReq := make([]*files.DeleteFileReq, 0)
 		for _, img := range images {
 			deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
-				Destination: fmt.Sprintf("images/activity/%s", img.FileName),
+				Destination: fmt.Sprintf("images/activities/%s", path.Base(img.Url)),
 			})
 		}
 		b.filesUsecases.DeleteFileOnStorage(deleteFileReq)
@@ -264,7 +265,7 @@ func (en *updateActivityEngineer) UpdateActivity() error {
 
 	fmt.Println(en.builder.getQuery())
 
-	// Update banner
+	// Update
 	if err := en.builder.updateActivity(); err != nil {
 		return err
 	}

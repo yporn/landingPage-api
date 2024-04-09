@@ -30,7 +30,7 @@ func (m *moduleFactory) FilesModule() IFilesModule {
 
 func (f *filesModule) Init() {
 	router := f.r.Group("/files")
-	router.Post("/upload", f.mid.JwtAuth(), f.mid.Authorize(2), f.handler.UploadFiles)
+	router.Post("/upload", f.mid.JwtAuth(), f.handler.UploadFiles)
 	router.Patch("/delete", f.mid.JwtAuth(), f.handler.DeleteFile)
 
 }
