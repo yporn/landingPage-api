@@ -34,7 +34,8 @@ services:
 
   app:
     container_name: app
-    image: pepapichat/sirarom-go-app
+    # image: pepapichat/sirarom-go-app
+    image: ypornwisa/sirarom
     # image: sirarom-go-app
     # build:
     #   context: .
