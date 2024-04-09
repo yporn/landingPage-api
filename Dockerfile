@@ -1,14 +1,9 @@
-FROM golang:1.22.1-alpine AS builder
-# FROM --platform=linux/amd64 golang:1.22.1-alpine AS builder
+FROM --platform=linux/amd64 golang:1.22.1-alpine AS builder
 
 WORKDIR /app
 
+COPY go.mod go.sum ./
 
-COPY go.mod .
-COPY go.sum .
-
-# RUN go clean -modcache
-# RUN go clean -cache
 
 RUN go mod download
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
@@ -18,15 +13,17 @@ RUN apk update && apk add --no-cache curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.1/migrate.linux-amd64.tar.gz | tar xvz && \
     mv migrate /usr/local/bin/migrate
 
-RUN go mod tidy
+# RUN go mod tidy
 
 COPY . .
+RUN go mod tidy
 
 RUN go build -o main .
 
+
 # RUN chmod +x entrypoint.sh
 
-FROM alpine:3.16
+FROM --platform=linux/amd64 alpine:3.16
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
