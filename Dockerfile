@@ -13,11 +13,13 @@ RUN apk update && apk add --no-cache curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.1/migrate.linux-amd64.tar.gz | tar xvz && \
     mv migrate /usr/local/bin/migrate
 
-RUN go mod tidy
+# RUN go mod tidy
 
 COPY . .
+RUN go mod tidy
 
 RUN go build -o main .
+
 
 # RUN chmod +x entrypoint.sh
 
