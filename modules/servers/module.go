@@ -1,7 +1,12 @@
 package servers
 
 import (
+	"context"
+	"io/ioutil"
+
 	"github.com/gofiber/fiber/v2"
+	"google.golang.org/api/analyticsreporting/v4"
+	"google.golang.org/api/option"
 
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesHandlers"
 	"github.com/yporn/sirarom-backend/modules/activities/activitiesRepositories"
@@ -9,6 +14,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsHandlers"
 	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsRepositories"
 	"github.com/yporn/sirarom-backend/modules/activityLogs/activityLogsUsecases"
+	"github.com/yporn/sirarom-backend/modules/analytics/analyticsHandlers"
+	"github.com/yporn/sirarom-backend/modules/analytics/analyticsRepositories"
+	"github.com/yporn/sirarom-backend/modules/analytics/analyticsUsecases"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoHandlers"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoRepositories"
 	"github.com/yporn/sirarom-backend/modules/appinfo/appinfoUsecases"
@@ -60,6 +68,7 @@ type IModuleFactory interface {
 	PromotionModule()
 	LogoModule()
 	ActivityLogModule()
+	AnalyticModule()
 }
 
 type moduleFactory struct {
@@ -118,7 +127,7 @@ func (m *moduleFactory) AppinfoModule() {
 
 	router := m.r.Group("/appinfo")
 
-	router.Get("/apikey", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.GenerateApiKey)
+	router.Get("/apikey", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.GenerateApiKey)
 }
 
 func (m *moduleFactory) JobModule() {
@@ -131,9 +140,9 @@ func (m *moduleFactory) JobModule() {
 
 	router.Get("/:job_id", handler.FindOneJob)
 	router.Get("/", handler.FindJob)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,6), handler.AddJob)
-	router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(1,6), handler.UpdateJob)
-	router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(1,6), handler.DeleteJob)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 6), handler.AddJob)
+	router.Patch("/update/:job_id", m.mid.JwtAuth(), m.mid.Authorize(1, 6), handler.UpdateJob)
+	router.Delete("/:job_id", m.mid.JwtAuth(), m.mid.Authorize(1, 6), handler.DeleteJob)
 }
 
 func (m *moduleFactory) GeneralModule() {
@@ -145,7 +154,7 @@ func (m *moduleFactory) GeneralModule() {
 	router := m.r.Group("/data_setting")
 
 	router.Get("/:general_id", m.mid.JwtAuth(), handler.FindOneGeneral)
-	router.Patch("/update/:general_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateGeneral)
+	router.Patch("/update/:general_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.UpdateGeneral)
 }
 
 func (m *moduleFactory) InterestModule() {
@@ -159,9 +168,9 @@ func (m *moduleFactory) InterestModule() {
 	router.Get("/:interest_id", handler.FindOneInterest)
 	router.Get("/", handler.FindInterest)
 
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.AddInterest)
-	router.Patch("/update/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.UpdateInterest)
-	router.Delete("/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.DeleteInterest)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.AddInterest)
+	router.Patch("/update/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.UpdateInterest)
+	router.Delete("/:interest_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.DeleteInterest)
 }
 
 func (m *moduleFactory) BannerModule() {
@@ -174,9 +183,9 @@ func (m *moduleFactory) BannerModule() {
 
 	router.Get("/:banner_id", handler.FindOneBanner)
 	router.Get("/", handler.FindBanner)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.AddBanner)
-	router.Patch("/update/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateBanner)
-	router.Delete("/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.DeleteBanner)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.AddBanner)
+	router.Patch("/update/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.UpdateBanner)
+	router.Delete("/:banner_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.DeleteBanner)
 }
 
 func (m *moduleFactory) ActivityModule() {
@@ -189,9 +198,9 @@ func (m *moduleFactory) ActivityModule() {
 
 	router.Get("/:activity_id", handler.FindOneActivity)
 	router.Get("/", handler.FindActivity)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,5), handler.AddActivity)
-	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(1,5), handler.UpdateActivity)
-	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(1,5), handler.DeleteActivity)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 5), handler.AddActivity)
+	router.Patch("/update/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(1, 5), handler.UpdateActivity)
+	router.Delete("/:activity_id", m.mid.JwtAuth(), m.mid.Authorize(1, 5), handler.DeleteActivity)
 }
 
 func (m *moduleFactory) ProjectModule() {
@@ -205,9 +214,9 @@ func (m *moduleFactory) ProjectModule() {
 	router.Get("/:project_id", handler.FindOneProject)
 	router.Get("/", handler.FindProject)
 	router.Get("/:project_id/house_models", handler.FindProjectHouseModel)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.AddProject)
-	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.UpdateProject)
-	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.DeleteProject)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.AddProject)
+	router.Patch("/update/:project_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.UpdateProject)
+	router.Delete("/:project_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.DeleteProject)
 }
 
 func (m *moduleFactory) HouseModelModule() {
@@ -221,9 +230,9 @@ func (m *moduleFactory) HouseModelModule() {
 	router.Get("/all", handler.FindAllHouseModel)
 	router.Get("/:house_model_id", handler.FindOneHouseModel)
 	router.Get("/projects/:project_id", handler.FindHouseModel)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.AddHouseModel)
-	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.UpdateHouseModel)
-	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(1,3), handler.DeleteHouseModel)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.AddHouseModel)
+	router.Patch("/update/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.UpdateHouseModel)
+	router.Delete("/:house_model_id", m.mid.JwtAuth(), m.mid.Authorize(1, 3), handler.DeleteHouseModel)
 }
 
 func (m *moduleFactory) PromotionModule() {
@@ -236,9 +245,9 @@ func (m *moduleFactory) PromotionModule() {
 
 	router.Get("/", handler.FindPromotion)
 	router.Get("/:promotion_id", handler.FindOnePromotion)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,4), handler.AddPromotion)
-	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(1,4), handler.UpdatePromotion)
-	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(1,4), handler.DeletePromotion)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 4), handler.AddPromotion)
+	router.Patch("/update/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(1, 4), handler.UpdatePromotion)
+	router.Delete("/:promotion_id", m.mid.JwtAuth(), m.mid.Authorize(1, 4), handler.DeletePromotion)
 }
 
 func (m *moduleFactory) LogoModule() {
@@ -251,13 +260,13 @@ func (m *moduleFactory) LogoModule() {
 
 	router.Get("/", handler.FindLogo)
 	router.Get("/:brand_id", handler.FindOneLogo)
-	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.AddLogo)
-	router.Patch("/update/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.UpdateLogo)
-	router.Delete("/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1,2), handler.DeleteLogo)
+	router.Post("/create", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.AddLogo)
+	router.Patch("/update/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.UpdateLogo)
+	router.Delete("/:brand_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.DeleteLogo)
 }
 
 func (m *moduleFactory) ActivityLogModule() {
-	
+
 	repository := activityLogsRepositories.ActivityLogsRepository(m.s.db)
 	usecase := activityLogsUsecases.ActivityLogsUsecases(repository)
 	handler := activityLogsHandlers.ActivityLogsHandler(m.s.cfg, usecase)
@@ -265,5 +274,31 @@ func (m *moduleFactory) ActivityLogModule() {
 	router := m.r.Group("/activityLogs")
 
 	router.Get("/", handler.FindAllActivityLogs)
-	
+
+}
+
+func (m *moduleFactory) AnalyticModule() {
+	// Create a new context
+	ctx := context.Background()
+
+	// Load the credentials file
+	credsFile := "/Users/y.pornwisa/Desktop/sirarom/backend-sirarom/sirarom-6dae4ecb4d3c.json"
+	creds, err := ioutil.ReadFile(credsFile)
+	if err != nil {
+		return
+	}
+
+	// Create a new Google Analytics service using the credentials
+	service, err := analyticsreporting.NewService(ctx, option.WithCredentialsJSON(creds))
+	if err != nil {
+		return
+	}
+
+	repository := analyticsRepositories.AnalyticsRepository(service, "309379445")
+	usecase := analyticsUsecases.AnalyticsUsecase(repository)
+	handler := analyticsHandlers.AnalyticsHandler(m.s.cfg, usecase)
+
+	router := m.r.Group("/analytics")
+
+	router.Get("/data", handler.GetAnalyticsData)
 }

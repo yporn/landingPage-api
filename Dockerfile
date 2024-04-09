@@ -1,9 +1,11 @@
-FROM --platform=linux/amd64 golang:1.22.1-alpine AS builder
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# Install GCC
+RUN apk add --no-cache gcc libc-dev
 
+COPY go.mod go.sum ./
 
 RUN go mod download
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
