@@ -61,7 +61,7 @@ func (u *filesUsecase) uploadToStorageWorker(ctx context.Context, jobs <-chan *f
 		newFile := &filesPub{
 			file: &files.FileRes{
 				FileName: job.FileName,
-				Url:      fmt.Sprintf("http://%s:%d/%s", u.cfg.App().Host(), u.cfg.App().Port(), dest),
+				Url:      fmt.Sprintf("%s/%s", u.cfg.App().AppUrl(), dest),
 			},
 			destination: dest,
 		}

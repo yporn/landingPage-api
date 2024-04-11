@@ -25,6 +25,7 @@ func LoadConfig(path string) IConfig {
 				}
 				return p
 			}(),
+			appUrl:  envMap["APP_URL"], // เพิ่มใหม่
 			name:    envMap["APP_NAME"],
 			version: envMap["APP_VERSION"],
 			readTimeout: func() time.Duration {
@@ -114,7 +115,8 @@ type config struct {
 }
 
 type IAppConfig interface {
-	Url() string //host:port
+	Url() string    //host:port
+	AppUrl() string // เพิ่มใหม่
 	Name() string
 	Version() string
 	ReadTimeout() time.Duration
@@ -129,6 +131,7 @@ type IAppConfig interface {
 type app struct {
 	host         string
 	port         int
+	appUrl       string // เพิ่มใหม่
 	name         string
 	version      string
 	readTimeout  time.Duration
@@ -143,6 +146,7 @@ func (c *config) App() IAppConfig {
 }
 
 func (a *app) Url() string                 { return fmt.Sprintf("%s:%d", a.host, a.port) } // host:port
+func (a *app) AppUrl() string              { return a.appUrl }                             /// เพิ่มใหม่
 func (a *app) Name() string                { return a.name }
 func (a *app) Version() string             { return a.version }
 func (a *app) ReadTimeout() time.Duration  { return a.readTimeout }
@@ -173,7 +177,7 @@ func (c *config) Db() IDbConfig {
 	return c.db
 }
 
-func (d *db) Url() string      { 
+func (d *db) Url() string {
 	return fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		d.host,
@@ -184,7 +188,7 @@ func (d *db) Url() string      {
 		d.sslMode,
 	)
 }
-func (d *db) MaxOpenCons() int { return d.maxConnections}
+func (d *db) MaxOpenCons() int { return d.maxConnections }
 
 type IJwtConfig interface {
 	SecretKey() []byte
@@ -215,5 +219,3 @@ func (j *jwt) AccessExpiresAt() int       { return j.accessExpiresAt }
 func (j *jwt) RefreshExpiresAt() int      { return j.refreshExpiresAt }
 func (j *jwt) SetJwtAccessExpires(t int)  { j.accessExpiresAt = t }
 func (j *jwt) SetJwtRefreshExpires(t int) { j.refreshExpiresAt = t }
-
-
