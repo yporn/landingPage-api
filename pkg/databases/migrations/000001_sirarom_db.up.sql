@@ -351,7 +351,7 @@ CREATE TABLE "seo" (
     "description" TEXT,
     "keywords" VARCHAR,
     "robot" VARCHAR,
-    "google_bot" VARCHAR,
+    "google_bot" VARCHAR
 );
 
 ALTER TABLE "user_images"

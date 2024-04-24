@@ -87,6 +87,9 @@ func (b *updateUserBuilder) updateQuery() {
 		b.values = append(b.values, b.req.Password)
 		b.lastStackIndex = len(b.values)
 		setStatements = append(setStatements, fmt.Sprintf(`"password" = $%d`, b.lastStackIndex))
+	}else {
+		// Password is not provided, update it to NULL
+		setStatements = append(setStatements, `"password" = users.password`)
 	}
 
 	if b.req.Name != "" {

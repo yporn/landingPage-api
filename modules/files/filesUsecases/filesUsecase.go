@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	
 	"strings"
 	"time"
 
@@ -57,7 +58,7 @@ func (u *filesUsecase) uploadToStorageWorker(ctx context.Context, jobs <-chan *f
 				return
 			}
 		}
-
+		// fmt.Println("http://" + u.cfg.App().Host() + ":" + strconv.Itoa(u.cfg.App().Port()) + "/" + dest)
 		newFile := &filesPub{
 			file: &files.FileRes{
 				FileName: job.FileName,
