@@ -311,7 +311,7 @@ func (m *moduleFactory) AnalyticModule() {
 		return
 	}
 
-	repository := analyticsRepositories.AnalyticsRepository(service, "435786991")
+	repository := analyticsRepositories.AnalyticsRepository(service, "436823770")
 	usecase := analyticsUsecases.AnalyticsUsecase(repository)
 	handler := analyticsHandlers.AnalyticsHandler(m.s.cfg, usecase)
 

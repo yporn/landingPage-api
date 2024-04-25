@@ -79,11 +79,12 @@ func (h *promotionsHandlers) FindPromotion(c *fiber.Ctx) error {
 		).Res()
 	}
 
+
 	if req.Page < 1 {
 		req.Page = 1
 	}
-	if req.Limit < 5 {
-		req.Limit = 100000
+	if req.Limit ==0 {
+		req.Limit = 1000000
 	}
 
 	if req.OrderBy == "" {

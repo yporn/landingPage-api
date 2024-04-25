@@ -79,10 +79,11 @@ func (h *activitiesHandler) FindActivity(c *fiber.Ctx) error {
 		).Res()
 	}
 
+	
 	if req.Page < 1 {
 		req.Page = 1
 	}
-	if req.Limit < 5 {
+	if req.Limit == 0 {
 		req.Limit = 1000000
 	}
 

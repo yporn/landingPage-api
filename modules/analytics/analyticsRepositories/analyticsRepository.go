@@ -46,21 +46,35 @@ func (r *analyticsRepository) GetAnalyticsData() (*analytics.AnalyticsData, erro
 	if err != nil {
 		log.Fatalf("Error creating service: %v", err)
 	}
+	// Create the DimensionFilter
+	filter := &analyticsdata.FilterExpression{
+		Filter: &analyticsdata.Filter{
+			FieldName: "pageTitle",
+			StringFilter: &analyticsdata.StringFilter{
+				MatchType: "EXACT",
+				Value:     "/projects/1",
+			},
+		},
+	}
 
-	// Define the request
+	propertyID := "436823770"
+	// Create the request
 	req := &analyticsdata.RunReportRequest{
-		Property: "properties/436823770",
+		Property: fmt.Sprintf("properties/%s", propertyID),
 		DateRanges: []*analyticsdata.DateRange{
-			{StartDate: "yesterday", EndDate: "today"},
+			{StartDate: "2024-03-28", EndDate: "today"},
 		},
 		Dimensions: []*analyticsdata.Dimension{
 			{
-				Name: "browser",
+				Name: "pageTitle",
 			},
 		},
 		Metrics: []*analyticsdata.Metric{
-			{Name: "activeUsers"},
+			{
+				Name: "screenPageViews",
+			},
 		},
+		DimensionFilter: filter,
 	}
 
 	// Execute the request

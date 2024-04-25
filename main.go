@@ -1,22 +1,18 @@
 package main
 
 import (
-	// "context"
-	// "fmt"
-	// "log"
-	// "context"
-	// "fmt"
-	// "io/ioutil"
-	// "log"
+	"context"
+	"fmt"
+	
+	"log"
 	"os"
 
 	"github.com/yporn/sirarom-backend/config"
 	"github.com/yporn/sirarom-backend/modules/servers"
 	"github.com/yporn/sirarom-backend/pkg/databases"
-	// analyticsdata "google.golang.org/api/analyticsdata/v1beta"
-	// "google.golang.org/api/option"
-	// analyticsdata "google.golang.org/api/analyticsdata/v1beta"
-	// "google.golang.org/api/option"
+	analyticsdata "google.golang.org/api/analyticsdata/v1beta"
+
+	"google.golang.org/api/option"
 )
 
 func envPath() string {
@@ -28,50 +24,64 @@ func envPath() string {
 }
 
 func main() {
-	// // Replace with your downloaded JSON key file path
-	// credPath := "credentials.json"
+	// Replace with your Google Analytics 4 property ID
+	propertyID := "436823770"
 
-	// // Read the JSON credentials file
-	// credData, err := ioutil.ReadFile(credPath)
-	// if err != nil {
-	// 	log.Fatalf("Error reading credentials file: %v", err)
-	// }
+	// Replace this with the path to your service account credentials JSON file
+	serviceAccountFile := "credentials.json"
 
-	// // Create an authorized Analytics Data API service
-	// ctx := context.Background()
-	// svc, err := analyticsdata.NewService(ctx, option.WithCredentialsJSON(credData))
-	// if err != nil {
-	// 	log.Fatalf("Error creating service: %v", err)
-	// }
+	// Create a context.
+	ctx := context.Background()
 
-	// // Define the request
-	// req := &analyticsdata.RunReportRequest{
-	// 	Property: "properties/436823770",
-	// 	DateRanges: []*analyticsdata.DateRange{
-	// 		{StartDate: "yesterday", EndDate: "today"},
-	// 	},
-	// 	Dimensions: []*analyticsdata.Dimension{
-	// 		{Name: "date"},
-	// 	},
-	// 	Metrics: []*analyticsdata.Metric{
-	// 		{Name: "activeUsers"},
-	// 	},
-	// }
+	// Initialize the Google Analytics Data client.
+	client, err := analyticsdata.NewService(ctx, option.WithCredentialsFile(serviceAccountFile))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
 
-	// // Run the report
-	// resp, err := svc.Properties.RunReport("properties/436823770", req).Do()
-	// if err != nil {
-	// 	log.Fatalf("Error running report: %v", err)
-	// }
+	
+	
+	// Create the DimensionFilter
+	filter := &analyticsdata.FilterExpression{
+		Filter: &analyticsdata.Filter{
+			FieldName: "pagePath",
+			StringFilter: &analyticsdata.StringFilter{
+				MatchType:     "BEGINS_WITH",
+				Value:         "/projects/1/",
+			},
+		},
+	}
 
-	// // Print the report data
-	// if len(resp.Rows) > 0 {
-	// 	fmt.Printf("Number of sessions today: %v\n", resp.Rows[0].MetricValues[0].Value)
-	// } else {
-	// 	fmt.Println("No data found for today.")
-	// }
+	// Create the request
+	request := &analyticsdata.RunReportRequest{
+		Property: fmt.Sprintf("properties/%s", propertyID),
+		DateRanges: []*analyticsdata.DateRange{
+			{StartDate: "2024-03-28", EndDate: "today"},
+		},
+		Dimensions: []*analyticsdata.Dimension{
+			{
+				Name: "pageTitle",
+			},
+		},
+		Metrics: []*analyticsdata.Metric{
+			{
+				Name: "screenPageViews",
+			},
+		},
+		DimensionFilter: filter,
+	}
 
-    
+	// Execute the request
+	response, err := client.Properties.RunReport("properties/436823770", request).Do()
+	if err != nil {
+		log.Fatalf("Failed to get report: %v", err)
+	}
+
+	// Print the report data
+	for _, row := range response.Rows {
+		fmt.Printf("Date: %s, Users: %v\n", row.DimensionValues[0].Value, row.MetricValues[0].Value)
+	}
+
 	cfg := config.LoadConfig(envPath())
 	// fmt.Println(cfg.App())
 	// fmt.Println(cfg.Jwt())
