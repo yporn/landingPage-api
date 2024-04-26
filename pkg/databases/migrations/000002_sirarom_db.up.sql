@@ -22,8 +22,7 @@ VALUES (
 
 INSERT INTO
     "user_roles" ("user_id", "role_id")
-VALUES 
-    (2, 1),
+VALUES (2, 1),
     (1, 1);
 
 INSERT INTO
@@ -155,14 +154,15 @@ insert into
         "tel", "email", "link_facebook", "link_instagram", "link_twitter", "link_tiktok", "link_line", "link_website"
     )
 values (
-        '044-081-066', 
-        'sirarom.project1@gmail.com', 
-        'https://www.facebook.com/TheRichCondoKorat', 
-        'https://www.instagram.com/sirarom_korat/', 
-        '', 
-        'https://www.tiktok.com/@siraromkorat', 
-        'https://page.line.me/sirarom?openQrModal=true', 
-        'https://www.siraromproject.com/'
+        '044-081-066', 'sirarom.project1@gmail.com', 'https://www.facebook.com/TheRichCondoKorat', 'https://www.instagram.com/sirarom_korat/', '', 'https://www.tiktok.com/@siraromkorat', 'https://page.line.me/sirarom?openQrModal=true', 'https://www.siraromproject.com/'
+    );
+
+insert into
+    seo (
+        "title", "description", "keyword", "robot", "google_bot"
+    )
+values (
+        'sirarom', 'sirarom.project1@gmail.com', 'house', 'test', 'test'
     );
 
 COMMIT;

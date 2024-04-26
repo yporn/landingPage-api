@@ -11,6 +11,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/users"
+
 )
 
 type IUpdateUserBuilder interface {
@@ -87,11 +88,8 @@ func (b *updateUserBuilder) updateQuery() {
 		b.values = append(b.values, b.req.Password)
 		b.lastStackIndex = len(b.values)
 		setStatements = append(setStatements, fmt.Sprintf(`"password" = $%d`, b.lastStackIndex))
-	}else {
-		// Password is not provided, update it to NULL
-		setStatements = append(setStatements, `"password" = users.password`)
 	}
-
+fmt.Println("password %d",b.req.Password)
 	if b.req.Name != "" {
 		b.values = append(b.values, b.req.Name)
 		b.lastStackIndex = len(b.values)

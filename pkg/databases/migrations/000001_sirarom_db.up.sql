@@ -349,7 +349,7 @@ CREATE TABLE "seo" (
     "id" SERIAL PRIMARY KEY,
     "title" VARCHAR,
     "description" TEXT,
-    "keywords" VARCHAR,
+    "keyword" VARCHAR,
     "robot" VARCHAR,
     "google_bot" VARCHAR
 );

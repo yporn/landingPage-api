@@ -51,7 +51,7 @@ func ActivitiesHandler(cfg config.IConfig, activitiesUsecase activitiesUsecases.
 	}
 }
 
-func (h *activitiesHandler) FindOneActivity(c *fiber.Ctx) error {
+func (h *activitiesHandler) FindOneActivity(c *fiber.Ctx) error {  
 	activityId := strings.Trim(c.Params("activity_id"), " ")
 
 	activity, err := h.activitiesUsecase.FindOneActivity(activityId)
