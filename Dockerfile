@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM --platform=linux/amd64 golang:1.22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN go build -o main .
 
 # RUN chmod +x entrypoint.sh
 
-FROM alpine:3.16
+FROM --platform=linux/amd64 alpine:3.16
 WORKDIR /app
 
 # Copy compiled binary from builder stage
