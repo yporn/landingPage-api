@@ -48,6 +48,9 @@ import (
 	"github.com/yporn/sirarom-backend/modules/promotions/promotionsHandlers"
 	"github.com/yporn/sirarom-backend/modules/promotions/promotionsRepositories"
 	"github.com/yporn/sirarom-backend/modules/promotions/promotionsUsecases"
+	"github.com/yporn/sirarom-backend/modules/seo/seoHandlers"
+	"github.com/yporn/sirarom-backend/modules/seo/seoRepositories"
+	"github.com/yporn/sirarom-backend/modules/seo/seoUsecases"
 	"github.com/yporn/sirarom-backend/modules/users/usersHandlers"
 	"github.com/yporn/sirarom-backend/modules/users/usersRepositories"
 	"github.com/yporn/sirarom-backend/modules/users/usersUsecases"
@@ -68,6 +71,7 @@ type IModuleFactory interface {
 	PromotionModule()
 	LogoModule()
 	ActivityLogModule()
+	SeoModule()
 	AnalyticModule()
 }
 
@@ -277,12 +281,25 @@ func (m *moduleFactory) ActivityLogModule() {
 
 }
 
+func (m *moduleFactory) SeoModule() {
+	db := m.s.db.DB
+	repository := seoRepositories.SeoRepository(m.s.db, m.s.cfg)
+	usecase := seoUsecases.SeoUsecase(repository)
+	handler := seoHandlers.SeoHandler(m.s.cfg, usecase, db)
+
+	router := m.r.Group("/seo")
+
+	router.Get("/:seo_id", m.mid.JwtAuth(), handler.FindOneSeo)
+	router.Patch("/update/:seo_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.UpdateSeo)
+}
+
+
 func (m *moduleFactory) AnalyticModule() {
 	// Create a new context
 	ctx := context.Background()
 
 	// Load the credentials file
-	credsFile := "/Users/y.pornwisa/Desktop/sirarom/backend-sirarom/sirarom-6dae4ecb4d3c.json"
+	credsFile := "credentials.json"
 	creds, err := ioutil.ReadFile(credsFile)
 	if err != nil {
 		return
@@ -294,11 +311,11 @@ func (m *moduleFactory) AnalyticModule() {
 		return
 	}
 
-	repository := analyticsRepositories.AnalyticsRepository(service, "309379445")
+	repository := analyticsRepositories.AnalyticsRepository(service, "436823770")
 	usecase := analyticsUsecases.AnalyticsUsecase(repository)
 	handler := analyticsHandlers.AnalyticsHandler(m.s.cfg, usecase)
 
-	router := m.r.Group("/analytics")
+	m.r.Get("/analytics", handler.GetAnalyticsData)
 
-	router.Get("/data", handler.GetAnalyticsData)
+	
 }

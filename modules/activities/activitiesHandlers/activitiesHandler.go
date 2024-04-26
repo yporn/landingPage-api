@@ -51,7 +51,7 @@ func ActivitiesHandler(cfg config.IConfig, activitiesUsecase activitiesUsecases.
 	}
 }
 
-func (h *activitiesHandler) FindOneActivity(c *fiber.Ctx) error {
+func (h *activitiesHandler) FindOneActivity(c *fiber.Ctx) error {  
 	activityId := strings.Trim(c.Params("activity_id"), " ")
 
 	activity, err := h.activitiesUsecase.FindOneActivity(activityId)
@@ -79,10 +79,11 @@ func (h *activitiesHandler) FindActivity(c *fiber.Ctx) error {
 		).Res()
 	}
 
+	
 	if req.Page < 1 {
 		req.Page = 1
 	}
-	if req.Limit < 5 {
+	if req.Limit == 0 {
 		req.Limit = 1000000
 	}
 

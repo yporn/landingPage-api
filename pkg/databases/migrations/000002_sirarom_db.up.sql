@@ -17,14 +17,12 @@ VALUES (
         'y.pornwisa', 'pornwisa', 'y.pornwisa@gmail.com', '$2a$10$8KzaNdKIMyOkASCH4QvSKuEMIY7Jc3vcHDuSJvXLii1rvBNgz60a6', '0900000000', 'published'
     ),
     (
-        'admin', 'admin', 'admin001@kawaii.com', '$2a$10$3qqNPE.TJpNGYCohjTgw9.v1z0ckovx95AmiEtUXcixGAgfW7.wCi', '0900000000', 'published'
+        'admin', 'admin', 'admin001@admin.com', '$2a$10$3qqNPE.TJpNGYCohjTgw9.v1z0ckovx95AmiEtUXcixGAgfW7.wCi', '0900000000', 'published'
     );
 
 INSERT INTO
     "user_roles" ("user_id", "role_id")
-VALUES (2, 2),
-    (2, 3),
-    (2, 4),
+VALUES (2, 1),
     (1, 1);
 
 INSERT INTO
@@ -157,6 +155,14 @@ insert into
     )
 values (
         '044-081-066', 'sirarom.project1@gmail.com', 'https://www.facebook.com/TheRichCondoKorat', 'https://www.instagram.com/sirarom_korat/', '', 'https://www.tiktok.com/@siraromkorat', 'https://page.line.me/sirarom?openQrModal=true', 'https://www.siraromproject.com/'
+    );
+
+insert into
+    seo (
+        "title", "description", "keyword", "robot", "google_bot"
+    )
+values (
+        'sirarom', 'sirarom.project1@gmail.com', 'house', 'test', 'test'
     );
 
 COMMIT;

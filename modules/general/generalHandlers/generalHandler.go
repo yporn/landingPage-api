@@ -18,7 +18,7 @@ import (
 type generalHandlersErrCode string
 
 const (
-	findOneJGeneralErr generalHandlersErrCode = "general-001"
+	findOneGeneralErr generalHandlersErrCode = "general-001"
 	updateGeneralErr   generalHandlersErrCode = "general-002"
 )
 
@@ -50,7 +50,7 @@ func (h *generalHandler) FindOneGeneral(c *fiber.Ctx) error {
 	if err != nil {
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
-			string(findOneJGeneralErr),
+			string(findOneGeneralErr),
 			err.Error(),
 		).Res()
 	}
@@ -98,7 +98,7 @@ func (h *generalHandler) UpdateGeneral(c *fiber.Ctx) error {
 		// Handle error if logging fails
 		return entities.NewResponse(c).Error(
 			fiber.ErrInternalServerError.Code,
-			fmt.Sprintf("Failed to log activity %v", userID),
+			fmt.Sprintf("Failed to log general %v", userID),
 			err.Error(),
 		).Res()
 	}

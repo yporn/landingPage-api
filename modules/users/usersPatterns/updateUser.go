@@ -11,6 +11,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files"
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/users"
+
 )
 
 type IUpdateUserBuilder interface {
@@ -88,7 +89,7 @@ func (b *updateUserBuilder) updateQuery() {
 		b.lastStackIndex = len(b.values)
 		setStatements = append(setStatements, fmt.Sprintf(`"password" = $%d`, b.lastStackIndex))
 	}
-
+fmt.Println("password %d",b.req.Password)
 	if b.req.Name != "" {
 		b.values = append(b.values, b.req.Name)
 		b.lastStackIndex = len(b.values)

@@ -14,6 +14,7 @@ import (
 	"github.com/yporn/sirarom-backend/modules/files/filesUsecases"
 	"github.com/yporn/sirarom-backend/modules/users"
 	"github.com/yporn/sirarom-backend/modules/users/usersPatterns"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type IUsersRepository interface {
@@ -85,35 +86,40 @@ func (r *usersRepository) FindOneUserByEmail(email string) (*users.UserCredentia
 func (r *usersRepository) FindOneUser(userId string) (*users.User, error) {
 	query := `
 	SELECT to_jsonb("t")
-	FROM (
-		SELECT
-			"u".*,
-			(
-				SELECT
-					COALESCE(array_to_json(array_agg("i")), '[]'::json)
-				FROM (
+		FROM (
+			SELECT
+				"u".id,
+				"u".name,
+				"u".tel,
+				"u".email,
+				"u".username,
+				(
 					SELECT
-						"i"."id",
-						"i"."filename",
-						"i"."url"
-					FROM "user_images" "i"
-					WHERE "i"."user_id" = "u"."id"
-				) AS "i"
-			) AS "images",
-			(
-				SELECT
-					COALESCE(array_to_json(array_agg("r")), '[]'::json)
-				FROM (
+						COALESCE(array_to_json(array_agg("i")), '[]'::json)
+					FROM (
+						SELECT
+							"i"."id",
+							"i"."filename",
+							"i"."url"
+						FROM "user_images" "i"
+						WHERE "i"."user_id" = "u"."id"
+					) AS "i"
+				) AS "images",
+				(
 					SELECT
-						"r"."id",
-						"r"."role_id"
-					FROM "user_roles" "r"
-					WHERE "r"."user_id" = "u"."id"
-				) AS "r"
-			) AS "roles"
-		FROM "users" "u"
-		WHERE "u"."id" = $1
-	) AS "t";`
+						COALESCE(array_to_json(array_agg("r")), '[]'::json)
+					FROM (
+						SELECT
+							"r"."id",
+							"r"."role_id"
+						FROM "user_roles" "r"
+						WHERE "r"."user_id" = "u"."id"
+					) AS "r"
+				) AS "roles"
+			FROM "users" "u"
+			WHERE "u"."id" = $1
+		) AS "t";
+	`
 
 	userBytes := make([]byte, 0)
 	user := &users.User{
@@ -127,6 +133,14 @@ func (r *usersRepository) FindOneUser(userId string) (*users.User, error) {
 	if err := json.Unmarshal(userBytes, &user); err != nil {
 		return nil, fmt.Errorf("unmarshal user failed: %v", err)
 	}
+
+	//  // Hash the password
+	//  hashedPassword, err := utils.HashPassword(user.Password)
+	//  if err != nil {
+	// 	 return nil, fmt.Errorf("error hashing password: %v", err)
+	//  }
+	//  user.Password = hashedPassword // Update user's password with hashed version
+
 	return user, nil
 }
 
@@ -242,4 +256,9 @@ func (r *usersRepository) DeleteUser(userId string) error {
 		return fmt.Errorf("delete users failed: %v", err)
 	}
 	return nil
+}
+
+func verifyPassword(userPassword string, hashedPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(userPassword))
+	return err == nil
 }
