@@ -1,3 +1,4 @@
+# Use Go image as a builder
 FROM --platform=linux/amd64 golang:1.22-alpine AS builder
 
 # Set working directory
@@ -13,20 +14,24 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Install migrate tool
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.1/migrate.linux-amd64.tar.gz | tar xvz && \
-    mv migrate /usr/local/bin/migrate
+RUN apk --no-cache add curl \
+    && curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.1/migrate.linux-amd64.tar.gz | tar xvz && \
+    mv migrate /usr/local/bin/migrate \
+    && apk del curl
 
+# Clean up unused dependencies
 RUN go mod tidy
 
+# Copy the rest of the application source code
 COPY . .
 
 # Build the Go application
 RUN go build -o main .
 
-
-# RUN chmod +x entrypoint.sh
-
+# Use lightweight Alpine image for the final build stage
 FROM --platform=linux/amd64 alpine:3.16
+
+# Set working directory
 WORKDIR /app
 
 # Copy compiled binary from builder stage
@@ -39,4 +44,5 @@ COPY --from=builder /app/pkg/databases/migrations /app/pkg/databases/migrations
 # Expose port 3000
 EXPOSE 3000
 
-CMD ["sh", "-c","/app/main"]
+# Define command to run the application
+CMD ["/app/main"]
