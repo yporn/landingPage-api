@@ -85,11 +85,11 @@ func (b *updateUserBuilder) updateQuery() {
 	}
 
 	if b.req.Password != "" {
+		fmt.Println("password : ",b.req.Password)
 		b.values = append(b.values, b.req.Password)
 		b.lastStackIndex = len(b.values)
 		setStatements = append(setStatements, fmt.Sprintf(`"password" = $%d`, b.lastStackIndex))
 	}
-fmt.Println("password %d",b.req.Password)
 	if b.req.Name != "" {
 		b.values = append(b.values, b.req.Name)
 		b.lastStackIndex = len(b.values)
