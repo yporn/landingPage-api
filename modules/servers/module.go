@@ -157,7 +157,7 @@ func (m *moduleFactory) GeneralModule() {
 
 	router := m.r.Group("/data_setting")
 
-	router.Get("/:general_id", m.mid.JwtAuth(), handler.FindOneGeneral)
+	router.Get("/:general_id", handler.FindOneGeneral)
 	router.Patch("/update/:general_id", m.mid.JwtAuth(), m.mid.Authorize(1, 2), handler.UpdateGeneral)
 }
 
