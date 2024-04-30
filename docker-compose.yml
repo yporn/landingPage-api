@@ -45,6 +45,7 @@ services:
     volumes:
       - .env.prod:/app/.env
       - ./credentials.json:/app/credentials.json
+      - ./assets:/app/assets
     ports:
       - "8500:3000"
     # depends_on:
